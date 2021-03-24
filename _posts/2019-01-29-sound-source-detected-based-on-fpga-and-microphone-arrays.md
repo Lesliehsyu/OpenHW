@@ -8,6 +8,7 @@ image: assets/images/sound_source_detection.jpg
 作者：赵辰宇、白瑞昕、张慈庭
 
 ![isolution]({{ site.baseurl }}/assets/images/all_white.jpg)
+
 ## 第一部分 设计概述 / Design Introduction
 1.1 设计目的
 
