@@ -1,11 +1,12 @@
 # Site
-name: 'Mundana'
-description: 'Mundana is a free Jekyll theme for awesome people like you, Medium like.'
-logo: 'assets/images/logo.png'
+name: 'OpenHW'
+description: 'OpenHW is a website that accomodate various opensource projects'
+#logo: 'assets/images/logo.png'
 favicon: 'assets/images/favicon.ico'
-baseurl: '/mundana-theme-jekyll'
+baseurl: '/OpenHW'
+url: ""
 disqus: 'demowebsite'
-email: 'wowthemesnet@gmail.com'
+email: 'xup_shanghai@xilinx.com'
 mailchimp-list: 'https://wowthemes.us11.list-manage.com/subscribe/post?u=8aeb20a530e124561927d3bd8&amp;id=8c3d2d214b'
 
 include: ["_pages"]
@@ -19,21 +20,17 @@ plugins:
   - jekyll-seo-tag
   
 authors:
-    sal:
-      name:           Sal
-      site:           https://www.wowthemes.net
+    XUP-2020:
+      name:           XUP-2020        
       avatar:         /assets/images/avatar1.jpg
-      bio:            "Hi, I am Sal, the author of Mundana, the theme you're currently previewing. I hope you like it!"
-      email:          wowthemesnet@gmail.com
-      twitter:        https://twitter.com/wowthemesnet
+      bio:            "Collection of all projects in competitions of year 2020"
+      email:          xup@xilinx.com
 
-    jane:
-      name:           Jane
-      site:           https://www.wowthemes.net
-      avatar:         /assets/images/avatar2.jpg
-      bio:            "Blogger, fashionista, love to explore new ideas and write on my morning coffee!"
-      email:          fakemail@gmail.com
-      twitter:        https://twitter.com/wowthemesnet
+    XUP-2019:
+      name:           XUP-2019
+      avatar:         /assets/images/avatar2.png
+      bio:            "Collection of all projects in competitions of year 2019"
+      email:          xup@xilinx.com
  
 # Defaults
 defaults:
@@ -43,7 +40,7 @@ defaults:
       path: "_posts"
     values:
       layout: post
-      author: sal
+      author: XUP-2020
       avatar: /assets/images/avatar1.jpg
       
   # all pages

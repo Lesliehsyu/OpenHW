@@ -1,0 +1,20 @@
+I"<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">        
+            <div class="row align-items-center mb-5">
+                <div class="col-md-9">
+                    <h2 class="font-weight-bold">Free training Videos </h2>
+                    <h5 class="font-weight-bold">Xilinx FPGA Design highlights </h5>
+                </div>
+            </div>
+            <h4 class="font-weight-bold spanborder"><span>All {{page.title}}</span></h4>
+                {% assign posts = site.posts %}
+                {% for post in posts %}
+                {% if post.categories contains "project" %}
+                {% include main-loop-card.html %}
+                {% endif %}
+                {% endfor %}
+        </div>
+    </div>
+</div>
+:ET

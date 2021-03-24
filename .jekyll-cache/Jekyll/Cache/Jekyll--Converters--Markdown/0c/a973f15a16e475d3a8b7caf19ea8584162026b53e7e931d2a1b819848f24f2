@@ -1,0 +1,177 @@
+I"s<div class="container">
+<div class="row mt-3">
+        <div class="col-md-8 main-loop">     
+            <h2 class="font-weight-bold spanborder">Free training Videos </h2>
+                <h5 class="font-weight-bold">Xilinx FPGA Design highlights </h5>
+                
+                    <div>
+                    <p><iframe style="width:90%;" height="315" src="https://youtube/ZXiygbhmZoE;showinfo=0" frameborder="0" allowfullscreen=""></iframe></p>
+                    <center><p class="text-dark ml-1"> Vivado IP Integrator</p></center>
+                    </div>
+                    <div>
+                    <p><iframe style="width:90%;" height="315" src="https://www.youtube.com/embed/Cniqsc9QfDo?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen=""></iframe></p>
+                    <center><p class="text-dark ml-1"> Customing and Instantiating IP</p></center>
+                    </div>
+                    <div>
+                    <p><iframe style="width:90%;" height="315" src="https://www.youtube.com/embed/Cniqsc9QfDo?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen=""></iframe></p>
+                    <center><p class="text-dark ml-1"> Packaging IP</p></center>
+                    </div>   
+                    <div class="col-md-9">
+                        <h5 class="font-weight-bold">Embedded System Design (Zynq) highlights </h5>
+                    </div>  
+                    <div>
+                    <p><iframe style="width:90%;" height="315" src="https://www.youtube.com/embed/Cniqsc9QfDo?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen=""></iframe></p>
+                    <center><p class="text-dark ml-1"> Why Zynq?</p></center>
+                    </div>
+                    <div>
+                    <p><iframe style="width:90%;" height="315" src="https://www.youtube.com/embed/Cniqsc9QfDo?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen=""></iframe></p>
+                    <center><p class="text-dark ml-1"> Zynq Achitecture</p></center>
+                    </div>
+                    <div>
+                    <p><iframe style="width:90%;" height="315" src="https://www.youtube.com/embed/Cniqsc9QfDo?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen=""></iframe></p>
+                    <center><p class="text-dark ml-1"> Targeting Zynq with IP Integrator</p></center>
+                    </div> 
+            
+        </div>                  
+</div>
+
+<div class="col-md-4">
+    <div>
+        <h4 class="font-weight-bold spanborder"><span>Online Resource</span></h4>  
+        <ul>				             
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">Xilinx forums</a>
+                    </h6>
+                </span>
+            </li>    
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">Digilent Board Documentation</a>
+                    </h6>
+                </span>
+            </li> 
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">Digilent Classroom</a>
+                    </h6>
+                </span>
+            </li>              
+        </ul>
+    </div>  
+    <div>
+        <h4 class="font-weight-bold spanborder"><span>Zynq Resources</span></h4>  
+        <ul>				             
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">Xilinx SDSoC</a>
+                    </h6>
+                </span>
+            </li>    
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">The Zynq Book The best selling Zynq Book - available as a free ebook download</a>
+                    </h6>
+                </span>
+            </li> 
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">MicroZed chronicles ebook </a>
+                    </h6>
+                </span>
+            </li>              
+        </ul>
+    </div>
+    <div>
+        <h4 class="font-weight-bold spanborder"><span>PYNQ Resources</span></h4>  
+        <ul>				             
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">PYNQ.io</a>
+                    </h6>
+                </span>
+            </li>    
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">PYNQ GitHub</a>
+                    </h6>
+                </span>
+            </li> 
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">PYNQ documentation</a>
+                    </h6>
+                </span>
+            </li> 
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">PYNQ support forum</a>
+                    </h6>
+                </span>
+            </li>              
+        </ul>
+    </div>  
+    <div>
+        <h4 class="font-weight-bold spanborder"><span>Xilinx Linux Resources</span></h4>  
+        <ul>				             
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">Xilinx Linux Wiki</a>
+                    </h6>
+                </span>
+            </li>    
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">Xilinx Linux Technical Articles</a>
+                    </h6>
+                </span>
+            </li> 
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">Zybo Linux Tutorial</a>
+                    </h6>
+                </span>
+            </li>               
+        </ul>
+    </div>  
+    <div>
+        <h4 class="font-weight-bold spanborder"><span>​​Xilinx University Program Webpage</span></h4>  
+        <ul>				             
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">XUP AWS F1 information</a>
+                    </h6>
+                </span>
+            </li>                  
+        </ul>
+    </div>  
+    <div>
+        <h4 class="font-weight-bold spanborder"><span>Xilinx University Program Webpage</span></h4>  
+        <ul>				             
+            <li>
+                <span>
+                    <h6 class="font-weight-bold">
+                        <a href="{{site.baseurl}}{{ post.url }}" class="text-dark">www.xilinx.com/university</a>
+                    </h6>
+                </span>
+            </li>        
+        </ul>
+    </div>  
+</div>
+
+</div>
+:ET

@@ -1,0 +1,77 @@
+I"�<p>中国研究生电子设计竞赛每两年举办一次，自2014年第九届竞赛开始，改为一年举办一次。自1996年首届竞赛由清华大学发起并举办以来，始终坚持“激励创新、鼓励创业、提高素质、强化实践”的宗旨，经过二十余年的发展，竞赛覆盖了全国大部分电子信息类研究生培养高校及科研院所，并吸引了港澳台地区和亚太地区的代表队参赛。</p>
+
+<h2 id="其中特别设立了xilinx企业专项奖">其中特别设立了Xilinx企业专项奖</h2>
+
+<h3 id="一奖项设置">一、奖项设置</h3>
+
+<p>一等奖    1名  10000元奖金 + PYNQ-Z2开发板</p>
+
+<p>二等奖    4名  PYNQ-Z2开发板</p>
+
+<h3 id="二评选对象">二、评选对象</h3>
+
+<p>2019第十四届研电赛中，所有基于赛灵思平台的参赛作品均可报名参加赛灵思企业专项奖评选。</p>
+
+<h3 id="三技术要求">三、技术要求</h3>
+
+<ol>
+  <li>
+    <p>提供作品介绍文档（中文 + 英文）,包含：</p>
+
+    <p>a.  作品简介</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>500字左右的作品介绍，请描述作品来源、功能、架构、创新点/难点、外设清单等。
+</code></pre></div>    </div>
+
+    <p>b.  系统框图</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>清楚展示系统的结构、外设连接、硬件资源分配等信息。
+</code></pre></div>    </div>
+
+    <p>c.  作品展示照片（1-5张）</p>
+
+    <p>d.  Github源代码链接（鼓励开源，非强制）</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>模板链接: https://pan.baidu.com/s/10IYRALocHeO-jRZ88hCJmg
+
+提取码: 45vx          
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>提供3分钟左右的作品视频文件(或链接)，内容以作品演示为主。</p>
+  </li>
+</ol>
+
+<h3 id="四评审标准">四、评审标准</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">创新性/实用性</th>
+      <th style="text-align: center">难度/工作量</th>
+      <th style="text-align: center">平台结合度</th>
+      <th style="text-align: center">作品完成度</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">30%</td>
+      <td style="text-align: center">30%</td>
+      <td style="text-align: center">20%</td>
+      <td style="text-align: center">20%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="参赛项目排名">参赛项目排名</h2>
+
+<p><img src="/OpenHW/assets/images/cpipc_rank.png" alt="rank" /></p>
+
+<h2 id="大赛官网">大赛官网</h2>
+
+<p><a href="https://cpipc.chinadegrees.cn/cw/hp/6">https://cpipc.chinadegrees.cn/cw/hp/6</a></p>
+
+<h2 id="关于平台借用">关于平台借用</h2>
+<p>Xilinx学术合作公众号，点击联系 -&gt; 平台试用。</p>
+
+:ET

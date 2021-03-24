@@ -1,0 +1,75 @@
+I"�<p>Any current Xilinx platform, including <a href="http://www.pynq.io/"><strong>PYNQ</strong></a>, and <a href="https://www.xilinx.com/products/boards-and-kits/alveo.html"><strong>Alveo</strong></a>, can be used for the Open Hardware Design Contest. Participants can also enter using Amazon AWS EC2 F1, Nimbix, and other cloud providers.</p>
+
+<p>Teams can use any platform supported by the Vivado design suite.</p>
+
+<p>XUP FPGA boards include the Basys 3, the Nexys 4 DDR, and the Nexys Video.</p>
+
+<p>Recommended Zynq and Zynq Ultrascale+ boards include the PYNQ-Z1, PYNQ-Z2, ZUC104, and Ultra96 from Avnet.</p>
+
+<p><a href="https://www.xilinx.com/products/design-tools/vivado.html"><strong>Vivado</strong></a> and <a href="https://www.xilinx.com/products/design-tools/vitis.html"><strong>Vitis</strong></a> software can be used.</p>
+
+<p>Vitis is a new unified software platform that enables a broad range of developers - including software engineers and AI scientists - to take advantage of the power of hardware adaptability.</p>
+
+<p>Vitis is free-or-charge and available to download from <a href="www.xilinx.com/downloads"><strong>www.xilinx.com/downloads</strong></a></p>
+
+<h1 id="pynq-platforms">PYNQ platforms</h1>
+<hr />
+
+<p><img src="/OpenHW/assets/images/PYNQ_2.png" alt="PYNQ_1" /></p>
+
+<p>PYNQ is an open-source project that makes it easier to use Xilinx platforms.</p>
+
+<p>Using the Python language and libraries, designers can exploit the benefits of Xilinx platfroms to build more capable systems.</p>
+
+<p>For more on PYNQ see <a href="https://www.pynq.io/">www.pynq.io</a></p>
+
+<hr />
+
+<p><img src="/OpenHW/assets/images/PYNQ_1.jpg" alt="PYNQ_2" /></p>
+
+<p>The PYNQ-Z2 from TUL is the recommended platform for getting started with PYNQ. The PYNQ-Z2 includes a Zynq Z7020, 512 MB DDR3 memory, 2x Pmods, Arduino, and Raspberry Pi headers.</p>
+
+<p>For more information, please see the <a href="https://www.tul.com.tw/ProductsPYNQ-Z2.html"><strong>TUL PYNQ-Z2 page</strong></a></p>
+
+<hr />
+
+<p><img src="/OpenHW/assets/images/zcu_104.jpg" alt="zcu_104" /></p>
+
+<p>The ZCU104 is a Zynq Ultrascale+ board from Xilinx, supported by PYNQ.</p>
+
+<p>The board features a Zynq UltraScale+ MPSoC XCZU7EV, 2 GB DDR4 Memory, HDMI, DisplayPort, USB 3.0, LPC FMC.</p>
+
+<p>For more information, please see the <a href="https://www.xilinx.com/products/boards-and-kits/zcu104.html"><strong>Xilinx ZCU104 webpage</strong></a></p>
+
+<hr />
+
+<p><img src="/OpenHW/assets/images/Ultra96.jpg" alt="Ultra96" /></p>
+
+<p>The Ultra96 from Avnet is a Zynq Ultrascale+ board supported by PYNQ.</p>
+
+<p>The board features a Zynq UltraScale+ MPSoC ZU3EG, 2 GB DDR4 Memory, Wi-Fi / Bluetooth, Mini DisplayPort, USB 3.0.</p>
+
+<p>For more information, please see the <a href="http://zedboard.org/product/ultra96-v2-development-board"><strong>Avnet Ultra96 page</strong></a></p>
+
+<h1 id="compute-acceleration-platforms">Compute Acceleration platforms</h1>
+
+<hr />
+
+<p><img src="/OpenHW/assets/images/ALVEO.jpg" alt="ALVEO" /></p>
+
+<p>Xilinx Alveo are PCIe boards intended for compute acceleration and the recommended platform for the Open Hardware “Compute Acceleration” category. Current boards include the Alveo U50/U200/U250/U280.</p>
+
+<p>Free remote access to Alveo hardware is available to academics through the Xilinx <a href="https://www.xilinx.com/support/university.html"><strong>XACC program</strong></a></p>
+
+<p>For more information see the <a href="https://www.xilinx.com/products/boards-and-kits/alveo.html"><strong>Xilinx Alveo webpage</strong></a></p>
+
+<hr />
+
+<p><img src="/OpenHW/assets/images/aws.jpg" alt="aws" /></p>
+
+<p>Amazon EC2 F1 is a compute instance with Xilinx Virtex Ultrascale+ devices that you can program to create custom hardware accelerators for your application.</p>
+
+<p>AWS-F1 can be used for the Open Hardware “Compute acceleration” category.</p>
+
+<p>For more information, see the <a href="https://www.xilinx.com/support/university/aws-f1.html"><strong>XUP AWS F1 page</strong></a></p>
+:ET
