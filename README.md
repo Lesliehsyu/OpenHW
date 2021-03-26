@@ -1,51 +1,67 @@
-# OpenHW website guide
+# 本地运行网站
 
-[home](https://wowthemesnet.github.io/mundana-theme-jekyll/) &nbsp; | &nbsp; 
-[Download](https://github.com/wowthemesnet/mundana-theme-jekyll/archive/master.zip) &nbsp; | &nbsp; 
-[Buy me a coffe](https://www.wowthemes.net/donate/) &nbsp; | &nbsp; [Documentation](https://bootstrapstarter.com/bootstrap-templates/mundana-theme-jekyll/) &nbsp; | &nbsp; 
-[WordPress version](https://www.wowthemes.net/themes/mundana-wordpress/) 
+要在本地运行网站，你需要安装Ruby以及Jekyll，详情请看[**这里**](https://jekyllrb.com/docs/installation/)
 
-![mundana jekyll theme screenshot](assets/images/screenshot.jpg)
+**安装**
 
-### Documentation
+输入
 
-[How to install & use](https://bootstrapstarter.com/bootstrap-templates/mundana-theme-jekyll/)
+```
+git clone https://github.com/Zenfendson/OpenHW.git 
+```
 
-### Contribute to Mundana repository
+在本地的根路径下打开powerershell,输入`Jekyll bundle`等命令创建依赖
 
-1. In the top-right corner of this page, click **Fork**.
+这个项目的依赖通过Gemfile管理，Gemfile.lock里面有着当前Jekyll版本下对应的依赖，你需要根据你的Jekyll版本更新，尝试`bundle update`指令
 
-2. Clone a copy of your fork on your local, replacing *YOUR-USERNAME* with your Github username.
+成功后输入`bundle exec Jekyll serve`运行，也可在命令后加入后缀`--liverpool`, 可是执行`_config.yml`的更改
 
-   `git clone https://github.com/YOUR-USERNAME/mundana-theme-jekyll.git`
+# 如何添加新的文章
 
-3. **Create a branch**: 
+添加文章只需要简单的添加markdown文件，不需要参与到很多的html的开发，甚至不需要本地环境配置
 
-   `git checkout -b <my-new-feature-or-fix>`
+## 添加文本
 
-4. **Make necessary changes and commit those changes**:
+在_post路径下创建新的.md file 注意命名格式为：**Year-Month-Day-name.md**
 
-   `git add .`
+Jekyll 自动根据文件名的前缀对文章排序，该时间也对应文章发布时间。
 
-   `git commit -m "new feature or fix"`
+注意文件名应为全英文且**小写**
 
-5. **Push changes**, replacing `<add-your-branch-name>` with the name of the branch you created earlier at step #3. :
+## 添加图片
 
-   `git push origin <add-your-branch-name>`
+在`_asset/image/`下存放所有图片，文件名应为全小写，推荐一篇文章单独建立一个文件夹存放图片，方便管理
 
-6. Submit your changes for review. Go to your repository on GitHub, you'll see a **Compare & pull request** button. Click on that button. Now submit the pull request.
+# 网站的大致结构和配置
 
-That's it! Soon I'll be merging your changes into the master branch of this project. You will get a notification email once the changes have been merged. Thank you for your contribution.
+本网站使用了GitHub pages 默支持的Jekyll编译工具开发静态网站
 
+## 那Jekyll是如何进行编译的呢？相关的文件起什么作用呢？
 
-### Copyright
+### 关于 `_config.yml` 文件
 
-Copyright (C) 2019 WowThemes.net.
+该文件描述了网站的相关配置，一些基本设置需要在其中更改，如用到的插件，作者和联系方式等等。
 
-Theme designed and developed by [Sal](https://www.wowthemes.net), *free* under MIT license. 
+### 关于 `index.html` 文件
 
-<a href="https://www.wowthemes.net/donate/" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+网站的home界面由本文件设置
 
-### Live Demo
+### 关于 `_includes` 文件夹
 
-[Live Demo](https://wowthemesnet.github.io/mundana-theme-jekyll/)
+该路径下存放了网站要用的各种小插件
+
+### 关于 `_layouts` 文件夹
+
+该路径下存放了网站相关页面的布局
+
+### 关于 `_pages` 文件夹
+
+该路径下存放了网站页面的模板
+
+### 关于 `_site` 文件夹
+
+存放Jekyll编译过后的网站的html
+
+其它路径暂不做过多介绍
+
+[参考视频](https://www.youtube.com/watch?v=Zt_QzSbyDcw&t=897s)
