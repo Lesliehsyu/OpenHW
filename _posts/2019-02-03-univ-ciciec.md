@@ -6,7 +6,7 @@ image: assets/images/ciciec_2.jpg
 tags: [competition]
 ---
 
-![rank]({{ site.baseurl }}/assets/images/ciciec_1.jpg)
+![rank]({{ site.baseurl }}/assets/images/ciciec_2.jpg)
 
 全国大学生集成电路创新创业大赛”以服务产业发展需求为导向，以提升我国集成电路产业人才培养质量为目标，打造产学研用协同创新平台，将行业发展需求融入教学过程，提升在校大学生创新实践能力、工程素质以及团队协作精神，助力我国集成电路产业健康快速发展。
 
