@@ -2,7 +2,7 @@
 layout: post
 title:  "全国大学生集成电路创新创业大赛"
 categories: [ competition, news ]
-image: assets/images/ciciec_1.jpg
+image: assets/images/ciciec_2.jpg
 tags: [competition]
 ---
 
