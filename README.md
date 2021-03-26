@@ -14,7 +14,7 @@ git clone https://github.com/Zenfendson/OpenHW.git
 
 这个项目的依赖通过Gemfile管理，Gemfile.lock里面有着当前Jekyll版本下对应的依赖，你需要根据你的Jekyll版本更新，尝试`bundle update`指令
 
-成功后输入`bundle exec Jekyll serve`运行，也可在命令后加入后缀`--liverpool`, 可是执行`_config.yml`的更改
+成功后输入`bundle exec Jekyll serve`运行，也可在命令后加入后缀`--livereload`, 可是执行`_config.yml`的更改
 
 # 如何添加新的文章
 
