@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>/OpenHW/article-1/</loc>
+<lastmod>2019-01-17T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>/OpenHW/charm-old-cities/</loc>
 <lastmod>2019-01-18T00:00:00+08:00</lastmod>
 </url>
@@ -69,8 +73,8 @@
 <lastmod>2019-02-03T00:00:00+08:00</lastmod>
 </url>
 <url>
-<loc>/OpenHW/welcome-to-jekyll/</loc>
-<lastmod>2019-02-04T00:00:00+08:00</lastmod>
+<loc>/OpenHW/openhw-2020/</loc>
+<lastmod>2021-03-28T00:00:00+08:00</lastmod>
 </url>
 <url>
 <loc>/OpenHW/404/</loc>
