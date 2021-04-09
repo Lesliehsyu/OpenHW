@@ -3,7 +3,7 @@ layout: post
 title:  "基于多帧融合的智能相机处理系统"
 author: XUP-2020
 categories: [ project, 2020competition ]
-image: assets/images/mulfps_integrationcam_cover.jpg
+image: assets/images/mulfps_integrationcam_cover.png
 ---
 
 本设计针对低照度高动态情况下，单帧图像曝光不足导致的图像噪声大、色彩失准等问题，在传统的 HDR 多帧融合（Frames Merging）方法上，采用层次化的图像配准（Image Alignment）方案、自适应白平衡（White Balance）与色调映射（Tone Mapping）策略，在降低图像噪声、真实还原景物色彩的基础上，极大 抑制了多帧融合时常见的运动伪影（Motion Artifact）现象。本设计采用 FPGA 进 行图像处理加速后，可以实现视频流的实时处理，视频流经过摄像头输入后，由 FPGA 进行处理并以较低的时延经 HDMI 信号输出。

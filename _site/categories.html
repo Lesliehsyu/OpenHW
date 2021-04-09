@@ -209,49 +209,44 @@ var documents = [{
     "body": "2019/01/25 - 作者；岳恒；李志远；史巧雅 第一部分 设计概述1. 1 设计目的 近年来，机器学习，无人驾驶等领域是十分热门的研究话题。在这些领域中，电脑对环境的感知十分重要。因此三维的环境重建是必然的趋势，方便我们实现虚拟世界与现实世界之间的交互。 在三维重建中，主流的方式有视觉和激光雷达两种。视觉技术的测距方法是基于三角的测距法，最大范围是 5-8m，并不适用于较大的空间，且这种方法受光线的影响很大。相比之下，激光雷达可以用于的场景更为广泛。 1. 2 应用领域 三维建模的应用很广泛，例如无人机、无人驾驶汽车的即时避障，路径规划。同时也可以与机器视觉、3D 打印等技术也可以融合。在文物复刻和重建也是十分有意义的应用。 本次设计的基于 ZYNQ 的激光雷达三维建模系统，可以深入目标环境， 进行点云采集，重建三维空间模型，测量等机器视觉方面的应用。 1. 3 主要技术特点 首先，本系统采用 pcl 点云库中的 icp 算法，可将激光雷达返回的数据进行多次迭代计算，实现精确配准。 其次，本系统将激光雷达搭载在麦轮小车上，通过小车陀螺仪和电机编码器，实时传输小车的位置和速度信息，通过坐标系变换可得到激光雷达的实时精准定位。 本设计可以对距离为 1~5m，盲区较少的室内物体进行实时的三维重建， 不易受光线的影响。激光雷达搭载在可远程控制的小车上，可以用于勘察人无法进入的环境。 1. 4 关键性能指标 1. 5 主要创新点 （1） 可通过移动 app 对小车进行远程控制； （2） 算法基于 PCL 点云库； （3） 通过 Icp 算法可达到实时数据配准； （4） 利用 pynq 的 PL 模块对 icp 算法进行 HLS 加速。 第二部分 系统组成及功能说明2. 1 整体介绍 图 2. 1. 1 是整个系统的实现框图。系统由激光雷达、基于 STM32 的麦轮小车 和 Xilinx 公司 PYNQ-Z2 组成的。其中激光雷达通过网口将采集到的点云数据传给 PYNQ-Z2，麦轮小车上搭载了电机编码器、陀螺仪和蓝牙模块。转向和移动可有手机蓝牙程序控制。在运动过程中，将位移和姿态信息传递给 STM32 单片机，通过 UART 协议 STM32 将这些信息传递给 PYNQ-Z2，ZYNQ 根据位移和姿态信息计算出激光雷达的位移和姿态偏移。ZYNQ 根据姿态和位置信息的偏移将点云数据利用 ICP 算法拼接起来，拼接后用网口传出数据。 在本设计中，我们采用小车搭载激光雷达进行移动扫描，采集左、右和顶三面的信息进行重构。 2. 2 各模块介绍 2. 2. 1 R-Fans-16 激光雷达 本系统中激光雷达采集采用的是 R-Fans-16 导航型雷达，它通过 16 线 360°扫描实现三维探测成像。基于高精度激光回波信号测量技术，R-Fans-16 具备测程远（探测能力最远达到 200m），测量精度高（测距精度优于 2cm），回波强度准确（目标反射回波强度达到 8 位）等技术特点，同时兼顾了俯仰方向的角度覆盖和角分辨率。运行激光雷达时，通过网口将实时点云数据传输给 PYNQ-Z2。 2. 2. 2 基于 STM32 的麦轮小车 在这个麦轮小车上搭载了 STM32 单片机，本次实验中，利用了小车上的陀螺仪、编码器和蓝牙。小车上的陀螺仪和电机编码器通过 SPI 协议将数据传给 STM32 单片机，单片机通过计算得到小车的姿态和轮胎转速，然后利用 UART 协议，以 115200 的波特率将数据循环实时发送给 ZYNQ。小车的移动和转向利用蓝牙远程控制。 2. 2. 3 坐标系转换 本设计中采用的是 R-Fans-16 导航型雷达，它采集的数据是建立在自身的坐标系之中的，三维重建的本质是将激光雷达坐标系中的数据转换为大地绝对坐标系，即球坐标系转化为直角坐标系。 球坐标系是一种利用球坐标（r,θ,φ）表示一个点 P 在三维空间的位置的三维正交坐标系。如图 2. 2. 1 所示，原点与点 P 之间的“径向距离”为 r，原点到点 P 的连线与正 z 轴之间的“极角”为 θ,原点到点 P 的连线在 xy 平面的投影线与 x 轴之间的“方位角”为 φ。 球坐标系与直角坐标系之间的公式转化如下： 在本设计中，以车启动时的坐标为绝对坐标系的坐标原点，此后在每圈激光雷达的数据期间，以激光雷达为坐标原点建立一个个子坐标系，并记录此刻激光雷达在初始绝对坐标系下的位移偏转量。 xyz 三个坐标轴的方向与激光雷达坐标系的轴方向一致。借助电机的编码器， 可测得激光雷达的水平平面移动速度和方向，即可得知激光雷达坐标系与绝对坐标之间的平移量；通过陀螺仪，可测得激光雷达的姿态角，以得知激光雷达坐标系与绝对坐标系之间的旋转量。借助以上测得的两个数值以及球坐标系与直角坐标系之间的转换公式，即可将激光雷达坐标系中的点映射到大地绝对坐标系中。 2. 2. 4 点云配准（ICP 算法） ICP 算法配准就是要将两个不同坐标系下的点集，利用它们的几何特性匹配起来。需要求解目标点集和参考点集之间的刚体变换矩阵和平移矩阵，利用刚体变换矩阵作用在目标点集，使两个点集尽可能重合。对于目标点集 P 和参考点集 Q 来说，转换公式为： 上式不总是成立的，因此我们要最小化目标函数 求解 R 和 T 常用的方法有：SVD 和非线性优化。本设计中使用了 SVD 的方 法。 ICP 算法问题通常转换为最小二乘最优解问题，将整个问题分为两部分，第一部分是第二部分的基础和输入。第一部分称为粗略配准或全局配准，粗略配准即通过计算两点集间的位姿，得出点集间的大致重合结果，为下一步的精确配准提供合适初值。第二部分称精确配准或局部配准，对两个距离足够接近的点集使用迭代优化策略以达到最终的配准结果。 第三部分 完成情况及性能参数3. 1 总述 本系统本设计完成了激光雷达的点云采集、 陀螺仪、编码器的姿态信息采 集。 PYNQ-Z2 开发板的控制芯片 ZYNQ 使用的 PS-PL 设计极大地提高了系 统设计的便捷性、可行性，降低了系统的设计难度。 PS-PL 主从设计在保留系 统设计的简易性同时提高了系统的运行速度和处理能力。PL 端 IP 核的设计极 大地加快了算法的计算速度。本设计的点云拼接部分通过 PL 端的 IP 核加速， 增强了拼接效果，成功地实现了实时三维重建的功能。 3. 2 完成情况 在室内走廊中，我们摆放了一排桌子、一个消防灭火器，两侧分别为墙壁和 窗户，具体场景如下图 3. 2. 1 所示。 每采集 200 帧作为一组数据，存入 pcd 文件，得到每组数据生成的原始图像如图 3. 2. 2 所示，图像右侧为摆放桌子一侧，可看到明显桌面和桌脚的细节，左侧较低测为摆放的消防灭火器。 每相邻两组点云进行 icp 配准，得到完整的小车驶过走廊的三维模型如图 3. 2. 3 所示。 图片右侧离散的小点云为走廊中的窗户投射到室外返回的激光，若走廊两侧都为墙面，则可返回得到完 3. 3 性能参数 激光雷达点云采集时距离越远分辨率越低，在有效探测距离内对物体的宽度和深度的测量误差取决于设备的稳定性（这里指激光雷达的抖动程度）。宽度测量误差在 2cm 内，倾斜物体的测量误差为 6cm，倾斜角度的误差为 4°。 由于测量时小车自身会有轻微抖动，所以结果有一定的误差。 第四部分 总结4. 1 可扩展之处 （1）使用 python 编程。本次设计是 ZYNQ 上搭载了 Utunbu18. 04，基于 C++ 语言的编程。使用过程中只能调用 C 语言基本的库中的函数以及 PCL 库函数， 显示并不方便，对使用者并不友好。可将 PCL 移植到 Jupyter 平台，利用 Python 更方便更快捷。 （2）全方位的立体扫描。对于搭载激光雷达的小车来说，只能扫描小车的 左、右和顶三面进行单向的扫描。想要扫描一个特定的物体，则无法了解其立体的信息，可以选择更灵活的搭载物，例如无人机。 "
     }, {
     "id": 24,
-    "url": "/OpenHW/powerful-things-markdown-editor/",
-    "title": "Powerful things you can do with the Markdown editor",
-    "body": "2019/01/24 - There are lots of powerful things you can do with the Markdown editor If you’ve gotten pretty comfortable with writing in Markdown, then you may enjoy some more advanced tips about the types of things you can do with Markdown! As with the last post about the editor, you’ll want to be actually editing this post as you read it so that you can see all the Markdown code we’re using. Special formatting: As well as bold and italics, you can also use some other special formatting in Markdown when the need arises, for example:  strike through ==highlight== *escaped characters*Writing code blocks: There are two types of code elements which can be inserted in Markdown, the first is inline, and the other is block. Inline code is formatted by wrapping any word or words in back-ticks, like this. Larger snippets of code can be displayed across multiple lines using triple back ticks: . my-link {  text-decoration: underline;}If you want to get really fancy, you can even add syntax highlighting using Rouge.  Reference lists: The quick brown jumped over the lazy. Another way to insert links in markdown is using reference lists. You might want to use this style of linking to cite reference material in a Wikipedia-style. All of the links are listed at the end of the document, so you can maintain full separation between content and its source or reference. Full HTML: Perhaps the best part of Markdown is that you’re never limited to just Markdown. You can write HTML directly in the Markdown editor and it will just work as HTML usually does. No limits! Here’s a standard YouTube embed code as an example: "
+    "url": "/OpenHW/social-distance-detecting/",
+    "title": "社交距离检测装置",
+    "body": "2019/01/17 - 2019 年末，新冠疫情爆发, “保持人与人之间距离”的倡议也逐渐成为大家的共识。但事实上，在人流密集场合中，社交距离的保持时常被大家忽视。如何实时监测社交场合中人与人的距离，也成为一大难题。这也坚定了我们设计社交距离检测器的想法。 作者：王涵，潘捷，胡宇隆   第一部分 设计概述   1. 1 设计目的 2019 年末，新冠疫情爆发, “保持人与人之间距离”的倡议也逐渐成为大家的共识。但事实上，在人流密集场合中，社交距离的保持时常被大家忽视。如何实时监测社交场合中人与人的距离，也成为一大难题。这也坚定了我们设计社交距离检测器的想法。 本作品名为社交距离检测装置。以 PYNQ-Z2 为控制核心，先对图像进行采集，后借助物体识别技术，进行多人对象的实时识别并输出到显示器。同时，我们结合距离检测算法，监测对象间的距离，并进行越限报警。 1. 2 应用领域 本作品作为一款精度较高的距离检测器，具有广泛的应用场景。首先，在诸如商场、地铁站等公共人流密集场合中，本作品可以实时监测人与人之间的距离， 予以报警和监测，对于防止疫情具有重大意义。其次，在许多诸如篮球、足球的 运动竞技场合中，距离检测器也可以成为判罚的一大依据。除此以外，在银行 ATM 机排队取钱等场所，社交距离检测器的介入可以很好地保证取钱人的安全。 换句话来说，有距离检测需求的地方，就能有我们作品的身影。 1. 3 主要技术特点 (1) 图像数据采集由双目摄像头同时拍摄的 640480 分辨率照片构成的一张 1280480 分辨照片，读取到图像后再分割成左右两幅照片，以供神经网 络处理。 (2) 基于 YOLO V2 神经网络的识别算法，可以实现多人识别、实时识别。 (3) 完成 PL 端的神经网络加速器 IP 设计，实现对卷积、池化等运算的加速。 (4) 基于双目测距的距离检测算法，可以实现距离的实时监测并越限报警。 (5) 采用双线程并行执行技术，将图像采集设置为一个线程，与数据处理的线程并行进行，两个线程通过队列进行数据传递，以提升处理器的利用率并降低延迟。 1. 4 关键性能指标 (1) 该装置可以实现对画面中所有人物进行识别，由于采用YOLO神经网络， 并基于 COCO 数据集训练，识别精度较高，准确率可以接近 80%； (2) 该装置在 5m 范围内能较好测量目标到摄像头的距离，且运算速度较快， 可以达到毫秒级, 如果时间允许，准备购置性能更优秀的摄像头，实现更高的精度； (3) 该装置可以实现对画面中所有人进行三维空间中的距离测算，适用于多人场合； (4) 该装置拥有极低能耗，峰值功率不超过 5W（不包括显示器），理论片上功率仅为 3. 198W。 1. 5 主要创新点 (1) 距离检测算法：本作品创新性的提出了基于双目成像的距离检测算法，并根据设置的阈值实时对图像中对象的距离进行报警； (2) YOLO V2 神经网络加速：本作品利用 FPGA 上部署的硬件加速器对 YOLO V2 神经网络进行加速，提高了作品的快速性； (3) 应用场合：本作品很好地适应了新冠疫情防护对社会公共卫生安全距离的要求，弥补了市场技术空白。   第二部分 系统组成及功能说明   2. 1 整体介绍 本系统主要有双目摄像头模块、显示模块和主处理器三大模块构成，其中， 双目摄像头向系统输入图像信号，主处理器对双目摄像头输入的图像信号进行对应的识别处理，最后，显示模块将处理结果进行展示。 2. 2 各模块介绍 2. 2. 1 双目摄像头模块 本系统的摄像头模块采用双目摄像头模组，100 度无畸变双目镜头，双目分辨率最高为 2560960，实际采用 1280480 分辨率，在 3m 以内具有良好的测距精度，输入帧率不低于三十帧，价格低廉，性能较稳定，符合本系统实用设计。 摄像头与 PYNQ 通过 USB 接口连接到 PS 端，免驱动，简洁方便。 该模块可以实现对图像的准确获取，并将图像首先输出到 PYNQ 的 PS 端进行深度图计算，并传入神经网络，借助 PL 端部署的神经网络加速器运算进行人物检测。 2. 2. 2 显示模块 显示部分采用的是 22 寸 HDMI 显示器，画面清晰，显示细腻。通过 HDMI 线缆与 PYNQ 的 PL 端输出端口项链，由 PL 端部署的 Video 模块控制视频的输出，连接方便简单。 显示屏显示摄像头采集到的图像，以及对于人像识别及测距结果，同时，对于人像间距离过近的警告予以显示。 2. 2. 3 主处理器信息 650MHz 双核 Cortex-A9 处理器，DDR3 内存控制器，带 8 个 DMA 通道 和 4 个高性能 AXI3 从端口。高带宽外设控制器：千兆以太网，USB 2. 0，SDIO。 低带宽外设控制器：SPI，UART，CAN，I2C。可通过 JTAG，Quad-SPI 闪存 和 MicroSD 卡进行编程，可编程逻辑等效于 Artix-7 FPGA：13000 逻辑片，每个片有 4 个 6 输入 LUT 和 8 个触发器，630 KB 快速 Block RAM，4 个时钟管理片，每个片都有 一个锁相环（PLL）和混合模式时钟管理器（MMCM）， 220 个 DSP 片，片上模数转换器（XADC）。存储器：512MB DDR3，16 位总 线@1050Mbps，16MB 四 SPI 闪存，MicroSD 插槽。电源：由 USB 或 7V-15V 外部电源供电。   第三部分 完成情况及性能参数   3. 1 完成情况 本系统由摄像头模块，显示模块，处理器模块共同构成。预计实现功能如下： （1）通过人物识别，对画面中的人物对象进行识别； （2）通过距离计算，输出人物对象与摄像头的距离于画面中； （3）通过检测算法，计算人物对象间的距离，并与阈值进行比较和报警。(此处我们根据疫情期间政府对公共场合中对社交距离的要求，设置阈值为 1m) 目前，以上三大功能均已实现，各模块工作稳定，连接正常，除此以外，还需要进一步提升神经网络的运行速度。 3. 2 硬件设计 3. 2. 1 硬件组成 系统的硬件组成如下图所示，首先，双目摄像头将视频信号输入到 PYNQ-Z2 板 ARM 上进行处理，再经由 Yolo 神经网络 IP 加速，最后由板上 Video IP 将处理结果的 HDMI 信号输出到显示器上予以展示。 3. 2. 2 FPGA 利用 PL 端主要加载了用于人物识别检测的神经网络加速器 IP 与用于 HDMI 输出的 Video IP。系统内部通过 AXI 总线连接。神经网络加速器通过四个 S_AXI_HP 端口与 PS 端连接，可以访问 DDR 内存上的数据；Video 模块通过 S_AXI_GP 端口与 PS 端相连，用于接收视频的 RGB 数据，然后转换成 DVI 信号通过 HDMI 口输出。 系统目前 LUT 占用 87%，DSP 占用 76%，BRAM 占用 70%，FF 占用 48%，充分地利用了片上资源。 3. 3 软件设计 3. 3. 1 双目测距算法 双目测距原理大致如下：通过对两幅图像视差的计算，直接对前方景物 （图像所拍摄到的范围）进行距离测量，而无需判断前方出现的是什么类型的障碍物。所以对于任何类型的障碍物，都能根据距离信息的变化，进行必要的预警或制动。双目摄像头的原理与人眼相似。人眼能够感知物体的远近，是由于两只眼睛对同一个物体呈现的图像存在差异，也称“视差”。物体距离越远， 视差越小；反之，视差越大。视差的大小对应着物体与眼睛之间距离的远近， 这也是 3D 电影能够使人有立体层次感知的原因。其大体流程如下： 相较于单目测距算法，双目测距算法主要具有如下优势： （1）成本比单目系统要高，但尚处于可接受范围内，并且与激光雷达等方案相比成本较低； （2）没有识别率的限制，因为从原理上无需先进行识别再进行测算，而是对所有障碍物直接进行测量； （3）直接利用视差计算距离，精度比单目高； （4）无需维护样本数据库。 本作品通过 OpenCV 实现了 BM（Block-Matching）算法，其原理大致为将视频的当前帧划分为宏块，并将每个宏块与视频的附近帧中的相应块及其相邻邻居（有时只是前一个）进行比较。创建一个向量来模拟宏块从一个位置到另一个位置的运动。针对包括帧的所有宏块计算出的该运动构成了在帧中估计的运动。其优点在于算法速度较快，但精度略有损失。 3. 3. 2 YOLO V2 神经网络 YOLO 是典型的目标检测 one stage 方法，在 YOLO 算法中，核心思想就是 把物体检测（object detection）问题处理成回归问题，用一个卷积神经网络结构 就可以从输入图像直接预测 bounding box 和类别概率。用回归的方法去做目标检 测，执行速度快，达到非常高效的检测。 如上图所示，YOLOv1 的算法思想就是把一张图片，首先 reshape 成 448x448 大小（由于网络中使用了全连接层，所以图片的尺寸需固定大小输入到 CNN 中）， 然后将划分成 SxS 个单元格，以每个格子所在位置和对应内容为基础，来预测： （1）检测框（2）每个框的 Confidence（3）每个格子预测一共 C 个类别的概率 分数。 网络方面采用 GoogLeNet，卷积层主要用来提取特征，全连接层主要用来预 测类别概率和坐标。并且，作者将其中的 Inception 模块换成了 1x1 卷积后接 3x3 卷积，最终网络结构由 24 个卷积层和 4 个最大池化层和 2 个全连接层组成。  YOLO V2 相对初代有两方面主要改进：一，作者对原来的 YOLO 多目标检测框架进行了改进，在保持原有速度的优势之下，精度上得以提升。二，作者提出了一种目标分类与检测的联合训练方法，训练后的模型可以实现对最多达 9000 种物体的实时检测，我们的设备可以识别 80 种不同的物体，但仅筛选出所识别到的人用于检测。 3. 3. 3 软件总体设计 本装置软件部分主要包含 5 个方面，分别是：图像采集、距离计算、人物识别、距离判断、显示输出。 （1）图像采集：在 PS 端读取摄像头传入的同步双目图像数据，其是由两枚摄像头同时拍摄的 640480 分辨率照片构成的一张 1280480 分辨照片，读取到图像后再分割成左右两幅照片。并且，图像采集为单独的一个线程，与数据处理的线程并行进行，两个线程通过队列进行数据传递，以提升处理器的利用率并降 低延迟。 （2）距离计算：结合我们测量的摄像头标定参数，利用 OpenCV 库，使用 BM 算法对左右两幅图像进行匹配，以求得图像中各点的距离，并以左摄像头拍摄的图像为基准得到深度矩阵。这种算法速度快，虽牺牲了一定精度，但能降低延迟。 （3）人物识别：将左摄像头拍摄的画面处理后作为 YOLO 神经网络的输入， 并利用部署在 PL 端的神经网络加速器 IP 对卷积、池化等运算进行加速，得到网络输出的矩阵进行处理后再进行处理，筛选出图像中的人物以及其坐标和长宽。 （4）距离判断：结合 OpenCV 计算出的深度和 YOLO 神经网络计算出的人 物在图片中的坐标，得到人物在真实三维坐标中到摄像头的距离，并判断图像中所有识别出的人相互之间的距离，对所有没有保持社交距离的人做出标记。 （5）显示输出：在左摄像头的画面上用矩形标记处识别到的人物，并标出人 物距离摄像头的距离，单位为厘米。其中，与他人保持了良好社交距离的人用绿色的矩形框标出，没有与他人保持合适距离的人用红色的矩形标出，最后利用 PL 端的 Video 模块通过 HDMI 输出 640*480 分辨率的图像到显示器。   第四部分 总结   4. 1 可扩展之处 （1） 改善人物识别的算法，进一步提高检测速度，降低延迟； （2） 提高距离测量的精度，进一步提高检测报警的准确性； （3） 提升硬件控制设备，进一步改善实时性。 "
     }, {
     "id": 25,
-    "url": "/OpenHW/options-for-creating-new-site-with-jekyll/",
-    "title": "Options for creating a new site with Jekyll",
-    "body": "2019/01/23 - jekyll new &lt;PATH&gt; installs a new Jekyll site at the path specified (relative to current directory). In this case, Jekyll will be installed in a directory called myblog. Here are some additional details:  To install the Jekyll site into the directory you’re currently in, run jekyll new . If the existing directory isn’t empty, you can pass the –force option with jekyll new . –force.  jekyll new automatically initiates bundle install to install the dependencies required. (If you don’t want Bundler to install the gems, use jekyll new myblog --skip-bundle. ) By default, the Jekyll site installed by jekyll new uses a gem-based theme called Minima. With gem-based themes, some of the directories and files are stored in the theme-gem, hidden from your immediate view.  We recommend setting up Jekyll with a gem-based theme but if you want to start with a blank slate, use jekyll new myblog --blank To learn about other parameters you can include with jekyll new, type jekyll new --help. "
+    "url": "/OpenHW/mulfps-integrationcam-cover/",
+    "title": "基于多帧融合的智能相机处理系统",
+    "body": "2019/01/17 - 本设计针对低照度高动态情况下，单帧图像曝光不足导致的图像噪声大、色彩失准等问题，在传统的 HDR 多帧融合（Frames Merging）方法上，采用层次化的图像配准（Image Alignment）方案、自适应白平衡（White Balance）与色调映射（Tone Mapping）策略，在降低图像噪声、真实还原景物色彩的基础上，极大 抑制了多帧融合时常见的运动伪影（Motion Artifact）现象。本设计采用 FPGA 进 行图像处理加速后，可以实现视频流的实时处理，视频流经过摄像头输入后，由 FPGA 进行处理并以较低的时延经 HDMI 信号输出。 基于多帧融合的智能相机处理系统吴靖玮；姜雪涵；贺杨鹏   第一部分 设计概述   1. 1 设计目的 本设计针对低照度高动态情况下，单帧图像曝光不足导致的图像噪声大、色彩失准等问题，在传统的 HDR 多帧融合（Frames Merging）方法上，采用层次化的图像配准（Image Alignment）方案、自适应白平衡（White Balance）与色调映射（Tone Mapping）策略，在降低图像噪声、真实还原景物色彩的基础上，极大 抑制了多帧融合时常见的运动伪影（Motion Artifact）现象。本设计采用 FPGA 进 行图像处理加速后，可以实现视频流的实时处理，视频流经过摄像头输入后，由 FPGA 进行处理并以较低的时延经 HDMI 信号输出。 1. 2 应用领域 本设计可用于手持摄像系统（摄像机、智能手机）图像、视频流的 HDR 处 理，可用于低照度情况下固定监控系统的视频流 HDR 处理，可用于线上直播系统的视频流 HDR 处理。 1. 3 主要技术特点 采用层次化的图像配准方案，对输入的拜尔格式（Bayer Mosaic）原始图像 进行处理，生成四层高斯图像金字塔（Gaussian Pyramids）。较高层次的图像配准结果将作为低层次配准的预偏移。这一过程极大优化了算法效率，其结构化的特 点为并行处理提供了便利。 采用有权重的图像融合方案，对输入的多帧图像，经图像配准后计算相应图像对（Image Pairs）的 L1 残差，得到各融合帧（Alternate Frame）相对参考帧 （Reference Frame）的权重，有效地降低了配准失误造成的运动伪影。 采用自适应白平衡及色调映射策略，在低光照情况下最大程度还原了景物的 色彩；在保证较高信噪比的情况下，提高了主要景物的亮度。 利用 FPGA 进行硬件加速，在 Pynq-z2 的 Python 开发环境中挂载封装有 IP 加速核的 Overlay，极大提高了运行速度，能够实时处理。 1. 4 关键性能指标 相机感光度（ISO）、快门时间（Shutter Time）、融合帧数； 图像融合处理时间、视频流处理延时； 图像信噪比、色彩还原度、细节清晰度、纹理清晰度（人眼观察）。 1. 5 主要创新点 （1） 低照度高动态图像处理； （2） 层次化的图像配准； （3） 有权重的图像融合降噪； （4） 自适应白平衡与色调映射策略； （5） FPGA 硬件加速； （6） 低时延视频流处理。   第二部分 系统组成及功能说明   2. 1 整体介绍 PYNQ-Z2 是基于 Xilinx ZYNQ-7000 FPGA 的平台，除继承了传统 ZYNQ 平 台的强大处理性能外，还兼容 Arduino 接口与标准树莓派接口，这使得 PYNQZ2 的具有极大的可拓展性与开源性。PYNQ 是一个新的开源框架，使嵌入式编 程人员能够在无需设计可编程逻辑电路的情况下即可充分发挥 Xilinx Zynq All Programmable SoC（APSoC）的功能。与常规方式不同的是，通过 PYNQ-Z2，用户可以使用 Python 进行 APSoC 编程，并且代码可直接在 PYNQ-Z2 上进行开发 和测试。通过 PYNQ-Z2，可编程逻辑电路将作为硬件库导入并通过其 API 进行编程，其方式与导入和编程软件库基本相同。 Xilinx Zyng All Programmable device 是一种基于双核 ARM cortex - a9 处理 器（称为处理系统或 PS）的 SOC，集成了 FPGA fabric(称为可编程逻辑或 PL)。 PS 子系统包括许多专用外设(内存控制器、USB、Uart、IIC、SPI 等)，并可以扩展额外的硬件 IP，其封装在 PL 的 Overlay 中。Overlay（或 Hardware Libraries， 硬件库）是可编程/可配置的 FPGA 设计，能将用户设计的应用从 Zynq 的处理系 统（PS 端）扩展到可编程逻辑（PL 端）。Overlay 可用于加速软件程序，或为特定程序定制硬件平台。 本设计的硬件平台整体结构如上图所示。为了对低照度高动态下的多帧融合 图像处理系统进行硬件加速，我们利用 Vivado HLs 工具，自主设计了 DownSample、Alignment、Merge、raw2rgb 等 IP Cores，并通过 AXI 总线与处理器核（PS 端）及存储器接口相连。在 PYNQ-Z2 的设计流中，这些 IP 被封装成 Overlay 并构造 Python API 驱动，以供 PYNQ-Z2 中的 Python 开发环境（JupyterNotebook）调用。 我们调用了 PYNQ-Z2 自有的 HDMI Overlay 进行处理流程及结果的显示。此外，PYNQ-Z2 为我们提供了丰富的存储单元、外设模块与通信接口。这些存储单元被用来存储图像数据及各类处理中间结果，而各类外设模块及通信接口则 被用来进行系统调试与控制的过程监控。 图像处理系统的工作流程如上图所示。相机在低曝光的情况下拍摄多帧（比 如说，6 帧）图片，这些原始图片（RAW images）由相机 CCD 或 CMOS 图像传感器生成，其像素值以拜耳阵列的形式存储。我们首先将原始各输入帧进行一次系数 2 的均值下采样，两次系数 4 的高斯下采样，得到一个四层的高斯图像金字塔。基于这个高斯图像金字塔，我们进行层次化的图像配准。配准的结果将作为图像融合的参考，同时结合备选帧与参考帧的 L1 残差作为融合权重，进行图像 融合。融合后的图像进行去马赛克及伽马降噪，并进行自适应的白平衡及色调映 射等操作，将单通道的融合图像转为三通道（对应 RGB 色彩空间）输出图像， 最终输出与原始图像同分辨率的处理结果。 均值下采样与高斯下采样处理被封装在名为 DownSample 的 IP core 中，层次化图像配准处理被封装在名为 Alignment 的 IP core 中，图像融合处理被封装在名为 Merge 的 IP core 中，去马赛克、白平衡、色调映射等处理被封装在名为 raw2rgb 的 IP core 中。这些 IP cores 挂载到 AXI 总线上，经封装为 Overlay 提供 Python API 给 PYNQ-Z2 的 Jupyter-Notebook。 2. 2 各模块介绍 下采样模块（DownSample） 下采样模块为后续的层次化图像配准处理提供四层高斯图像金字塔。四层高斯金字塔的最底层为全分辨率的拜耳原始图像（我们称该层为 layer_raw），其像素点以拜耳阵列的形式排布，如下图所示。 我们首先进行系数 2 的均值下采样，直观上将一个 2*2 像素的“方格”取均值下采样为一个像素。下采样后的结果类似于一个单通道的灰度图像，但实际上绿色通道对下采样后的结果影响较大。我们称该层为 layer_0。 layer_0 随后进行两次系数 4 的高斯下采样。卷积核函数见附录。该卷积核 函数的大小为 5*5 像素，以 4 像素为步长在被采样的图像上以后，对该图像进行下采样。高斯下采样的结果将在一定程度上保留了采样前图像的低频信息，而图 像细节则被丢失。直观上图像的大致轮廓被保留，图像尺寸更小，细节模糊不清。 两次高斯下采样的结果分为称之为 layer_1 与 layer_2。 经下采样模块处理后的结果可以用下图说明。 图像配准模块（Alignment） 图像配准以图像对（Image Pairs）的形式，在融合备选帧（Alternate Frame） 与参考帧（Reference Frame）之间展开。对参考帧中的每一个 16*16 像素的图块 （Tile），寻找其在融合备选帧中使两者 L1 残差最小图块，两个图块位置上的偏 移即为配准结果。其 L1 残差的计算方式可用下式表达。 式中的求和对一个图块内的所有像素进行，配准的目的是对参考帧中的每一个图 块，寻找其在每一个备选帧中的对应图块，使得上式的结果最小。此时两个图块 的坐标偏移量即为配准结果。 在保证图像间偏差不大的前提下，图块配准的搜索范围可以限定图块原始位 置周围的若干像素内。为了进一步提高配准的效率，我们采用层次化的配准方案： 在上层低分辨率图像中进行预配准，配准结果将作为下层图像配准的预偏移 （Previous Offset）。各层图像以图块为基本单位，在预偏移的基础上进行小范围的配准。由此，上述残差计算式可以重新表达如下。 式中的𝑥𝑝, 𝑦𝑝即为上一层图像配准结果在本层配准的表达。 最终，层次化的图像配准处理将生成各层次上的配准结果。而我们所关心的 是全分辨率原始图像的配准结果，其将作为图像融合的依据进入到后续处理当中。 图像融合（Merge） 图像融合是多帧处理的关键步骤之一。在经过图像配准后，我们已经知道了参考帧中每一个图块在融合备选帧中的位置。这样一来，根据配准结果，从每一 个备选帧中提取相应的图块叠加在参考帧上，即可完成图像融合。然而，图像配准过程中有可能出现配准失误；另一方面，备选帧同样可能因为抖动而产生伪影。 这就需要依照参考帧图块与备选帧图块的偏差建立误差权重，误差小的图块融合时的权重大，而误差较大的图块在融合时的权重较小。 我们仍然使用类似于图像配准时的残差公式来计算误差，具体如下。 式中，𝑡𝑥,𝑡𝑦为参考帧中图块的索引，𝑥1, 𝑦1为配准后备选帧中图块内的像素 索引。通过计算相应图块内所有像素值的 L1 残差，我们就能衡量经过配准后的 图块对的误差，进而确定其在融合时的权重。 拜耳图像到 RGB 图像（raw2rgb） 上述处理的结果仍然是单通道的拜尔图像。我们需要将其转化为三通道的 RGB 图像，从而进行显示。余下的处理步骤通常包括校正（Correction）、去马赛 克（Demosaic）、色调映射（Tone Mapping）、白平衡（White Balance）等处理。 这些处理通常也由 ISP 完成。我们将这些处理封装在 raw2rgb 这一 IP core 中，进 而将处理的结果通过 HDMI 显示。   第三部分 完成情况及性能参数   我们完成了图 2 所述的各处理模块 IP cores 的封装与 Overlay 的挂载，通过在PYNQ-Z2本地读取一组6帧RAW格式拜耳图像（这些图像固定采用ISO=800， 快门时间为 1/16s 的拍摄参数），分块循环调用挂载的各处理模块 IP cores，进而 得到处理后的结果，通过 HDMI 进行显示。关键地，整个处理流程平均用时为83ms，并且具有进一步优化的空间。通过将更多的处理流程硬件化，减少在 AXI 总线上来回数据传输的次数，我们将进一步减少系统处理的平均用时。 下图是系统调试的实拍图。 通过对比，我们能够较为明显地看到处理效果。通常在低照度下拍摄的图像会呈现如下的效果。 如果为了图像效果，直接提高图像亮度，并提高对比度，则会产生较多噪声， 同时产生色彩偏移。图像会呈现如下的效果。 而经过 FPGA 中的图像处理系统处理后，图像的噪点被极大消去，色彩得到了校正，更加接近景物的原始色泽。图像呈现出如下的效果。 对上图的局部进行放大后，可以明显看到经过处理后的图像，在效果上有了明显的提升。下图是三处细节放大后的对比结果。   第四部分 总结   4. 1 可扩展之处 （1）通过将更多的处理流程硬件化，减少在 AXI 总线上来回数据传输的次数，我们将进一步减少系统处理的平均用时，最后实现视频流的实时处理。之后，我们将为该系统加装摄像头模块，使得实时视频流经过系统处理后，以低时延输出。 （2）通过优化色调映射模块，我们计划在全局色调映射前加入局部色调映射，进一步提升在低照度下图像色彩的质量。 （3）通过调用 PYNQ-Z2 提供的 OpenCV 图像处理库，我们计划在图像处理流中增加人脸识别模块，对人脸识别激活的图块进行细致的配准及融合处理， 使得我们的图像处理系统在面对人脸时具有更好的效果。 "
     }, {
     "id": 26,
-    "url": "/OpenHW/never-stopped-worrying-never-loved-bomb/",
-    "title": "Never stopped worrying or loving the bomb",
-    "body": "2019/01/22 - I’ve been through fire and water, I tell you! From my earliest pebblehood the wildest things you could imagine have been happening to this world of ours, and I have been right in the midst of them. So begins Hallam Hawksworth’s The Strange Adventures of a Pebble. Written in the 1920s, the book was part of a series which also included The Adventures of a Grain of Dust and A Year in the Wonderland of Trees, all of which were supposed to introduce children to the world of Natural Sciences. In each of them, Hawksworth personifies the natural object he is exploring, and using a mixture of folk tales, scientific facts and colloquial, friendly explanations guides the reader through the history of the natural world. It’s a real thrill of a ride, dramatizing the life cycle of supposedly dull things. The Adventures of a Grain of Dust begins even more loudly than Pebble: I don’t want you to think that I’m boasting, but I do believe I’m one of the greatest travellers that ever was; and if anybody, living or dead, has ever gone through with more than I have I’d like to hear about it.  Hallam Hawksworth was the pen-name of teacher Francis Blake Atkinson. He was married to the author Eleanor Stackhouse Atkinson, author of the children’s classic Greyfriars Bobby, which was based on the (supposedly) true story of a Scottish dog who spent fourteen years guarding his masters grave. The couple were both committed to education and published a weekly magazine for Chicago high school students called The Little Chronicle, as well as working for Encyclopaedia companies later in life. I’ve been through fire and water, I tell you! From my earliest pebblehood the wildest things you could imagine have been happening to this world of ours, and I have been right in the midst of them. So begins Hallam Hawksworth’s The Strange Adventures of a Pebble. Written in the 1920s, the book was part of a series which also included The Adventures of a Grain of Dust and A Year in the Wonderland of Trees, all of which were supposed to introduce children to the world of Natural Sciences. In each of them, Hawksworth personifies the natural object he is exploring, and using a mixture of folk tales, scientific facts and colloquial, friendly explanations guides the reader through the history of the natural world. It’s a real thrill of a ride, dramatizing the life cycle of supposedly dull things. The Adventures of a Grain of Dust begins even more loudly than Pebble: I don’t want you to think that I’m boasting: Hallam Hawksworth was the pen-name of teacher Francis Blake Atkinson. He was married to the author Eleanor Stackhouse Atkinson, author of the children’s classic Greyfriars Bobby, which was based on the (supposedly) true story of a Scottish dog who spent fourteen years guarding his masters grave. The couple were both committed to education and published a weekly magazine for Chicago high school students called The Little Chronicle, as well as working for Encyclopaedia companies later in life. I’ve been through fire and water, I tell you! From my earliest pebblehood the wildest things you could imagine have been happening to this world of ours, and I have been right in the midst of them.  So begins Hallam Hawksworth’s The Strange Adventures of a Pebble. Written in the 1920s, the book was part of a series which also included The Adventures of a Grain of Dust and A Year in the Wonderland of Trees, all of which were supposed to introduce children to the world of Natural Sciences. In each of them, Hawksworth personifies the natural object he is exploring, and using a mixture of folk tales, scientific facts and colloquial, friendly explanations guides the reader through the history of the natural world. It’s a real thrill of a ride, dramatizing the life cycle of supposedly dull things. The Adventures of a Grain of Dust begins even more loudly than Pebble: I don’t want you to think that I’m boasting, but I do believe I’m one of the greatest travellers that ever was; and if anybody, living or dead, has ever gone through with more than I have I’d like to hear about it. Hallam Hawksworth was the pen-name of teacher Francis Blake Atkinson. He was married to the author Eleanor Stackhouse Atkinson, author of the children’s classic Greyfriars Bobby, which was based on the (supposedly) true story of a Scottish dog who spent fourteen years guarding his masters grave. The couple were both committed to education and published a weekly magazine for Chicago high school students called The Little Chronicle, as well as working for Encyclopaedia companies later in life. "
+    "url": "/OpenHW/magneticfield-scan/",
+    "title": "磁场扫描仪",
+    "body": "2019/01/17 - 磁场测量是研究物质特性、探索未知世界的有效手段之一，广泛应用于 水下通信、空间磁场探测、地质勘探等军事和民用领域[1]。本作品是为了设计实现出一款快速低功耗小型化的磁场扫描仪，通过扫描的方式来得到该区域的磁场测量图像，为后续的探测或检测提供磁场图像数据。 作者：马凯；谌辰睿；张恒康   1 设计概述   1. 1 设计目的 磁场测量是研究物质特性、探索未知世界的有效手段之一，广泛应用于 水下通信、空间磁场探测、地质勘探等军事和民用领域[1]。本作品是为了设计实现出一款快速低功耗小型化的磁场扫描仪，通过扫描的方式来得到该区域的磁场测量图像，为后续的探测或检测提供磁场图像数据。 1. 2 应用领域 本磁场扫描仪得到的图像可以运用于地下磁性小目标的检测[2]，也可以运用于无损缺陷检测领域，目前已经有研究应用于核电站蒸汽发生器换热管检测[3]、油气井套管变形段位置及缺陷检测[4]、铝板的裂纹检测[5, 6]等。 1. 3 主要技术特点 （1） 自主设计制作了基于 HMC1001 的磁传感器； （2） 基于磁阵列传感器扫描成像； （3） Adc 采集精度为 24 位，采集速度最大可达 256KSPS； （4） 自主设计了 AD7768 配置和接收的 IP 核； （5） 自主设计了 256 位采集数据传输 DDR 存储的 IP 核； （6） SD 卡存储数据，为了以后的验证成像的准确性和进一步的处理做准备。 1. 4 关键性能指标 （1） 磁传感器的检测精度； （2） 阵列传感器每个传感器之间的间隔距离要小于 5cm； （3） 采集精度要大于 16 位； （4） 采集所有磁场数据所用时间要小于 2 分钟； （5） 算法的运行时间小于 1 分钟； 1. 5 主要创新点 （1） 自主设计的基于 HMC1001 芯片的磁场传感器； （2） 基于 8 个 HMC1001 磁场传感器组成的传感阵列来扫描得到区域磁场数据； （3） 8 路的磁场数据用 FPGA 同步，高速采集； （4） 磁场图像的复原算法与实现； （5） 扫描后的生成的磁场图像实时在 LCD 屏幕上实时显示出来，磁场强度大小以不同的颜色进行标明，更直观。   2 系统组成及功能说明   2. 1 整体介绍 我们设计的是一款磁场扫描仪，工作原理图如图 1 所示，Zynq7010 芯片来控制传动装置运动，传动装置带动阵列磁传感器来扫描下方区域的磁场情况，然后通过 AD7768 芯片来把磁阵列传感传输的电压模拟值转换成数字信号数据传输给 zynq7010。Zynq7010 来接收和处理采集到的磁场数据，当扫描完一个区域后把这片区域的磁场情况显示在 lcd 液晶屏上并把数据存储到 SD 卡中。 2. 2 各模块介绍 根据总体系统框图，整个系统是主要由这几个模块组成：磁阵列传感器模块、 AD7768 数模转换模块、zynq7010是系统的控制和数据处理模块、lcd 显示模块， 传动模块。下面就针对这几个模块做具体的设计说明。 2. 2. 1 磁阵列传感器 这部分是使用 8 个磁传感器并排排放组成并排阵列分布，每个磁传感器是由 自主设计并制做，实物图如图 3 所示，是基于 HMC1001 芯片并设计了后面的信 号处理电路。HMC1001 芯片由内置 4 个磁阻组成惠斯顿电桥[7]如图 2 所示，当 外部磁场平行于传感器内部电流所形成的磁场时，传感器内部电阻值不发生变化; 当外部磁场与内部磁化方向不一致时，电阻值大小发生变化。 磁传感器信号处理电路的工作原理如图 4 所示，磁场强度信号经过 HMC1001 芯片转换成电压信号，然后经过放大电路把 HMC1001 芯片传输的微小电压信号放大，再经过放大且消除自激震荡后反馈给 HMC1001 芯片来消除环境磁场的干扰，最后再经过滤波输出。 2. 2. 2 AD7768 数模转换模块 模/数转换器（ADC） 的作用是将在时域和幅值上都连续变化的模拟信号转换为时域上离散、幅值上量化的等效数字信号。当分辨率很高（16bit 以上）时， 由于前端需要设置抗混叠滤波器、采样/保持电路，增加了采集系统的复杂度， 使得传统的奈奎斯特速率 ADC 的测量精度受限；而模/数转换采用过采样技术，对输入的模拟信号以高于奈奎斯特频率若干倍的频率进行采样，随后进行低比特量化，再将这种高采样率、低分辨率的数字信号经数字抽取滤波器进行 抽取滤波，最终获得以奈奎斯特采样频率输出的高分辨率数字信号。AD7768 芯 片是 AD 公司生产的 24 位型 ADC 芯片，AD7768 芯片工作原理图如图5所示，采集的数据首先经过模/数采样，然后经过数字滤波器来消除转换 过程中注入的一些噪声。相较与其他 ADC 芯片，AD7768 芯片具有 8 个通道的 差分同步采样输入接口和 8 个同步输出接口，同时每个通道的采样速率高达 256 KSPS. 2. 2. 3 传动模块 传动模块的工作原理图如图 6 所示，光电门负责给 zynq7010 传输位置信息， Zynq7010 负责传送控制信号来控制电机的转速和运动，控制信号要经过 3. 3V 转 5V 模块把电压升为 5V，因为步进电机驱动器的信号驱动要求电压达到 5V。步进电机驱动器如图 7 所示，负责接收控制信号，根据控制信号来控制步进电机，步进电机带动丝杆滑台运动。  2. 2. 4 zynq7010 模块 Zynq7010 用的是黑金的开发板，如图 8 所示，该开发板采用的是 xilinx 公司的 zynq7010. 芯片，有 4G 的高速 DDR3 作为数据的存储，同时提供了管脚丰富的扩展口。我们设计实现的功能有：配置 AD7768，接收、转换、传输和存储 AD7768 传输的数据，数据的处理，数据的算法拟合，数据转换成彩色图像传输给 lcd 显示。 （1） 配置 AD7768 根据 AD7768 手册，AD7768 配置采用的是 SPI 接口，使用的是帧外协议， 即第一帧为命令，第二帧为响应，波形如图 9 所示。本设计就是根据该波形在 PL 端设计实现 zynq7010 来配置 AD7768 采集模式。 （2） 接收 AD7768 数据 AD7768 传输的数据时序图如图 10 所示，本设计的接收 AD7768 数据就是根据该波形接收并转换成 256 位的数据，然后经过 FIFO 和 DMA 传输到 DDR 中 存储。 （3） 拟合算法 拟合算法的作用是把采集的 81024 的数据扩展为 6001024 的数据用于 lcd 显示，该拟合算法使用的双线性插值，又称为双线性内插。在数学上，双线性插值是有两个变量的插值函数的线性插值扩展，其核心思想是在两个方向分别进行一次线性插值。双线性插值作为数值分析中的一种插值算法，广泛应用在信号处 理，数字图像和视频处理等方面。 如图 11，已知Q12 ，Q22 ，Q11，Q21，但是要插值的点为 P 点，这就要用双线性插值了，首先在 x 轴方向上，对 R1 和 R2 两个点进行插值，然后根据 R1 和 R2 对P 点进行插值，这就是所谓的双线性插值。 假设已知四个点的坐标为 Q11(x1,y1)，Q12(x1,y2)，Q21(x2,y1)，Q22(x2,y2)。 首先在 x 轴方向进行插值得到： 然后在 y 方向进行线性插值，得到: 即插值公式可以化简为： （4） LCD 显示 LCD 显示模块：使用了 VDMAIP 核，功能为将处理后的像素数据从 DDR 缓存帧取出发送给 Video Out IP 核，Video Out IP 核再配合 VTC IP 核（负责产生 LCD 屏幕时序）将流数据重新组织成 RGB 格式的数据，发送给 rgb2lcd IP 核， rgb2lcd IP 核将像素数据和时序数据发送给 LCD 屏幕，最终在屏幕上显示出画面。   3 完成情况及性能参数   (1) 目前完成了 6 个磁传感器组成的阵列扫描，如图 12 所示。 (2) 数模转换精度位数为 24 位，最大转换输出速率为 256KSPS。 (3) 采集和数据处理运行时间为：106179581us (4) 对 61024 个 double 类型数据插值为 6001024 个数据所用时间为：2. 534s。 (5) 采集的数据转换为 rgb 数据用时：0. 16s。 (6) LCD 屏幕刷新率可达 60FPS，实验显示情况如图 13： 图 13 是做实验最后在 LCD 显示的情况，图 14 是用 MATLAB 根据 SD 卡中存储的数据做的插值和显示图像。这两个图像对比可以看出本系统做的图像差值和显示是正确的。   4 总结   4. 1 可扩展之处 目前整个程序都是在裸机下运行，后面可以加上 Linux 操作系统，在操作系 统下运行程序，好处：可使用 OpenCV 等库函数对图像做精细化处理；操作系统 下对于数据的处理方式更多，效果更好。还可以用上深度学习技术根据得到的磁 场图来检测和定位扫描的管道缺陷位置和类型[4]。 "
     }, {
     "id": 27,
-    "url": "/OpenHW/is-intelligence-enough/",
-    "title": "Is Intelligence Enough",
-    "body": "2019/01/21 - Education must also train one for quick, resolute and effective thinking. To think incisively and to think for one’s self is very difficult. We are prone to let our mental life become invaded by legions of half truths, prejudices, and propaganda. At this point, I often wonder whether or not education is fulfilling its purpose. A great majority of the so-called educated people do not think logically and scientifically.  Even the press, the classroom, the platform, and the pulpit in many instances do not give us objective and unbiased truths. To save man from the morass of propaganda, in my opinion, is one of the chief aims of education. Education must enable one to sift and weigh evidence, to discern the true from the false, the real from the unreal, and the facts from the fiction. The function of education, therefore, is to teach one to think intensively and to think critically. But education which stops with efficiency may prove the greatest menace to society. The most dangerous criminal may be the man gifted with reason, but with no morals. The late Eugene Talmadge, in my opinion, possessed one of the better minds of Georgia, or even America. Moreover, he wore the Phi Beta Kappa key. By all measuring rods, Mr. Talmadge could think critically and intensively; yet he contends that I am an inferior being. Are those the types of men we call educated? We must remember that intelligence is not enough. Intelligence plus character–that is the goal of true education. The complete education gives one not only power of concentration, but worthy objectives upon which to concentrate. The broad education will, therefore, transmit to one not only the accumulated knowledge of the race but also the accumulated experience of social living. "
+    "url": "/OpenHW/humanface-forery-stream/",
+    "title": "基于 FPGA 的视频流人脸伪造设备",
+    "body": "2019/01/17 - 近年来随着机器学习等技术的发展，人工智能在图像识别、语音处理等方面的能力不断增强、应用范围不断扩大，这极大的方便了人们的生活。然而随之带来的安全问题也变得越来越不可忽视。 作者：陈鹏宇 吴锦煊 严鼎量   第一部分 设计概述（Design Introduction）   1. 1 设计目的 近年来随着机器学习等技术的发展，人工智能在图像识别、语音处理等方面的能力不断增强、应用范围不断扩大，这极大的方便了人们的生活。然而随之带来的安全问题也变得越来越不可忽视。 鉴于此，我们决定采用 Xilinx 的 PYNQ-Z2 开发板，将 FPGA 高度并行化的特点与人工智能安全相结合，设计了一种具有实时人脸伪造能力的视频采集设备。目的在于对视频 数据进行有针对性的伪造，协助安全系统的评估与改进。相较于传统的基于软件实现的人 脸伪造系统，采用FPGA，功耗与成本较低，实时性较高，伪造结果真实，并且隐蔽性更高。对安全系统的性能具有更大的挑战，更有助于安全系统的测试。 1. 2 应用领域 本作品的应用前景十分广泛，例如在人脸支付领域，可以对现有的人脸识别系统进行 测试，辅助找出人脸识别系统的漏洞，进而提高人脸识别系统的稳定性与可靠性。如果利用在会议视频中，可以协助会议平台完善对参会者的身份验证的系统，防止出现利用参会者的照片、视频信息冒名顶替的行为。 1. 3 主要技术特点 （1）总体采用 Deepfake 框架，本质是由一套人脸识别、合成、融合构成的技术框架，属 于图像模型在软硬件结合的深度学习中的应用。 （2）软件端的算法设计包括锚框、人脸特征检测、点云匹配、DeepFake Module、泊松融合、前后景融合、边缘膨胀等技术。 （3）硬件端的相关层采用 Xilinx 开发的神经网络加速 IP 核 DPU，同时结合 Vitis AI 对神经网络模型进行压缩优化编译，转换成可供 FPGA 使用的神经网络模型。 1. 4 关键性能指标 （1）延迟：使用 DeepFake 后的延迟约为 270ms。 （2） 帧率：在 640×360 的分辨率下，经过 DeepFake 后的 FPGA 输出的帧率约为 4fps。 1. 5 主要创新点 （1）采用软硬件结合的方式来实现 Deepfake 框架，相较于传统采用 GPU 加速的方式具有功耗低、体积小、成本低的特点。 （2）对 Deepfake 算法进行了优化，一方面图像信息存储采用 int8 数据类型，激活函数采用计算更快的 ReLU。另一方面对输入输出矩阵的维度进行调整。这些优化对算法速度有很大提升。 （3）完成可配置性的设计，一方面从硬件角度采用多种视频流的接入方式（硬件摄像头/ 网络摄像头），另一方面在算法的图像融合部分设计了两种不同的算法。这些设计可以适应不同处理质量、实时性和应用场景的要求。    第二部分 系统组成及功能说明 （System Construction &amp; Function Description）   2. 1 系统介绍 本系统由 Xilinx Zynq-7000 系列的 PYNQ-Z2 开发板作为主控中心，主要包含摄像头 （视频）采集模块、图像处理模块、数据处理终端。总体结构如图 1 所示，图像处理结构如图 2 所示。 系统流程图说明： 由摄像头获取人物时时的图片信息，传送给 PYNQ-Z2 开发板，并在 PYNQ-Z2 中采用 神经网络模型对图像进行处理。最后将处理结果返回到上位机终端，实现真假人脸的转换。 图像处理算法部分说明： 首先进行帧截取，将动态视频流转换成静态帧。通过锚框将全身人像的人脸部分截取出来，再通过人脸特征检测提取出人脸的特征。再提取出特征之后，采用点云匹配算法完成整个人脸的对齐，而后直接使用 Deepfake Module 换掉对齐后的人脸，再通过点云匹配将换后的人脸对齐。然后采用泊松融合或者前后景+边缘膨胀的方式将人脸还原到静态图片帧（具体采用哪种取决于算力与实时性的要求），最终将静态图片帧还原到视频流中。 2. 2 硬件模块介绍 2. 2. 1 FPGA 开发板 本系统主要采用 Xilinx Zynq-7000 的 PYNQ-Z2 开发板作为主控中心。从硬件方面上， 该开发板采用 FPGA+ARM 的双处理架构，拥有采用 Cortex-A9 双核处理器的 ARM 芯片， 主频可以达到 650MHz，同时还有快速的 Block RAM 芯片，速度可以达到 630KB。从软件方面上，Xilinx 提供大量的 Python API，同时提供深度学习相关的 IP 核 DPU 以及相应的配套软件 Vitis AI，可以快速部署相应的深度学习模型。 2. 2. 2 视频采集模块 该模块采用罗技的 C270 高清摄像头。摄像头采用 USB 2. 0 接口，内置麦克风，同时免驱动。捕获画面最大可达到 1280×720。使用较为简便，并且可以达到本项目的要求，因此十分适合在该项目中使用。 2. 2. 3 FPGA 硬件 IP 核 DPU DPU 的详细硬件架构如图 5 所示。启动时，DPU 获取片内存储器中的指令来控制计算引擎的运行。这些指令是由 Vitis AI 编译器生成的，并且在编译时进行了很多优化。片上存储器用于缓冲输入，中间和输出数据，以实现高吞吐量和处理效率。DPU 中的数据均尽可能重复使用来减少内存带宽并且使用基于深度流水线设计的计算引擎。处理元件（PE） 充分利用了 Xilinx 器件中的细粒度构造块，例如多路复用器，加法器和累加器等。 同样的这里给出 DPU 的端口图如图 6 所示，端口的详细类型、数据位宽、I/O 类型以及简单的描述在图 7 中。 2. 3 图像处理算法介绍 2. 3. 1 视频流接入的设计 考虑到可能的不同情境，我们为此设计了两种视频流的接入方式。一种是采用 USB 在安装好摄像头驱动的 PYNQ 开发板上直接插入摄像头（PYNQ 直接处理），另一种方式是采用网络摄像头的网络传输接入方式（PYNQ 作为加速器）。网络摄像头采用 Python 中的 socket 库进行开发，可以完成视频流的接收与转发。USB 方式和网络摄像头方式可以分别适应远程与近程两种控制模式。 2. 3. 2 锚框+人脸特征检测 锚框部分： 锚框部分是我们对整体Deepfake框架的第一次优化，因此这里首先对算法的选择进行说明。最开始时考虑使用OpenCV中内置的机器学习函数库HaarCascade。OpenCV中有Haar 级联分类器，通过分析对比相邻图像区域来判断给定图像或者图像区域与已知对象是否匹 配。可以将多个Haar级联分类器组合起来，每个分类器负责匹配一个特征区域（比如眼 睛），然后进行总体识别。也可以一个分类器进行整体区域识别（比如人脸），其他分类                                      器可识别小的部分（比如眼睛)等。但是Opencv提供的Haar级联分类器和跟踪器并不具有旋转不变性，也就是说无法较好的识别侧脸。而且只有将输入图片的尺寸设计在64×64时才 能将时间控制在40ms以下。此时的识别效果很差，故舍弃该方法。接下来采用opencv中的dnn函数对基于mobilenet-ssd 网络设计的人脸检测模型进行推理。虽然此时的识别率较高并且清晰度也较好，但是耗时大约为300ms，时间极长，也放弃了该方法。因此，最后考虑使用Densebox方法来锚框。 DenseBox 目标检测算法是一个集成的 FCN 框架，并且不需要生成 proposal，在训练过程中也可以达到最优。与现存的基于滑动窗的 FCN 的检测框架相类似，DenseBox 更偏重于小目标及较为模糊目标的检测，比较适合对人脸的检测。整体流程如图 10 所示。 单一的卷积网络同时输出不同的预测框及类别分数。DenseBox 中的所有目标检测模块 都为全卷积网络结构，除了 NMS 处理部分，因此没有必要生成 proposal。人脸锚框时，输 入图片大小为𝑚 × 𝑛 × 3，输出为𝑚/4 × 𝑛/4 × 5。将目标边界框左上角及右下角的点的坐标域定 义为𝑝𝑡 = (𝑥𝑡 , 𝑦𝑡)及𝑝𝑏 = (𝑥𝑏, 𝑦𝑏)，则第 i 个位置的像素的输出就可以用一个 5 维向量描述 其中s^代表识别到是目标的分数，剩余几个变量代表输出像素位置与真实边框之间的距离。最后对带有边框及类别分数的框进行 NMS 处理。其中 NMS（非极大值抑制）就是抑制不是极大值的元素，可以理解为局部最大搜索。这个局部代表一个两参数可变的邻域，一是邻域的维数，二是邻域的大小。这个操作的目的实际上就是将重叠框最后减少到 只有一个框。 在具体的工程实现中，在权衡实时性、图片质量等多个因素之后，我们采用 320× 320 × 3的输入和 80× 80 × 4与 80× 80 × 2的输出。其中 80× 80 × 4的输出是每个框的左上角和右下角坐标。80× 80 × 2的输出是每个框是人脸的概率和不是人脸的概率。注意这里比上面的算法流程中多出一维，是因为将是人脸和不是人脸的概率均输出出来了， 而算法流程中仅输出是人脸的概率。最后在 DPU 的 IP 核上运行该算法，每检测一张人脸的耗时为 43ms。较好的平衡了计算耗时与计算效果。具体在这个工程中的网络结构如图 11 所示。 人脸特征检测部分： 该部分网络结构的思想来自 VanillaCNN，为了更好的匹配 FPGA 的特点和处理要求， 这里将原网络调整成新的 98 个关键点的 landmark 网络。98 landmark 这个网络是专门为 DPU 计算设计的，因为 DPU 不支持 tanh 函数和绝对值单元，这里采用 ReLU 作为激活函 数。ReLU 的计算成本比较低，并且由于激活函数大部分的梯度为 0，因此训练的速度也更快。多次训练该网络，最后能将网络的测试损失从 0. 022 减少到 0. 019。同时为了提高该神经网络的空间分辨率，这里采用扩张卷积替换了原始算法中的池化层，这一步将网络的测试损耗从 0. 019 降低到 0. 011。原始算法中仅能进行 5 个特征的标注，这在 Deepfake 框架 后面的换脸中明显是不够用的，因此这里将特征的标注数量从 5 个增长到 98 个。相应的， 网络的输入层从原输入40 × 40 Pixels 变为80 × 80 Pixels，输出层由原来 10 输出的全连接层修改成 196 输出的全连接层，其中 98 个 x 坐标和 98 个 y 坐标。具体的网络结构如图 12 所示。最终采用这个网络标注一张脸花费的时间约为 7ms。 2. 3. 3 人脸对齐 Umeyama 是一种点云匹配算法，是将源点云变换到目标点云的相同坐标系下,包含了 常见的矩阵变换和 SVD 的分解过程。算法的核心在于使变换前后两组点之间的均方距离最小。具体来说就是对两组均为 d 维的点集 A 和 B（各包含 n 个样本点），假定点集 A 的均值为𝜇𝐴，均方差为𝜎𝐴，点集 B 的均值为𝜇𝐵，均方差为𝜎𝐵，点集 A 与点集 B 之间的协方差 则两组点之间的均方距离用下式表示： 定义矩阵 S 为 当协方差矩阵的秩恰为d-1时对 S 进行修改  对协方差矩阵进行 SVD 分解得到 当协方差矩阵的秩不小于d-1的时候参数表示如下 通过该算法就可以将已经标记好的人脸特征进行标准化旋转，方便下面在对应位置直接进行换脸。 2. 3. 4 DeepFake Model 网络总体采用 Encoder – Decoder 的形式。网络由一个 Encoder 和两个 Decoder 组成，两个 Decoder 分别对应换脸人照片和换脸对象照片的解码。其中 Encoder – Decoder 的网络结构如图 13 和图 14 所示。  这里涉及到对 Deepfake 框架优化的第二点，相比于在 CPU 和 GPU 上运行的该框架的算法，这里为更好适应 FPGA 的特点对网络结构进行了重建。具体的网络实现如图 15 和 图 16 所示。 相比于原始算法中的网络结构，新的网络结构将中间 Flatten 的步骤删去。在 Encoder 中采用卷积与激活函数结合的方式，取 leak 值为 0. 1，并且保证每次让区域的长和宽减小为原来的二倍，让区域的深度增长到原来的二倍。在 Decoder 中在卷积与激活函数后面加上上采样的过程，每次卷积将深度减为原来的一半，每次上采样将区域的长和宽增长到原来的两倍。 2. 3. 5 调色 考虑到训练时换脸人与换脸对象的数据集可能在拍摄时处在不同的光线条件下，或者换脸人与换脸对象的肤色本身存在一定的差异。因此这里为了保证能更好的融合换脸人和被换脸对象的面部，提前进行调色。假定换脸人人脸的图像矩阵为 A，换脸对象的人脸图像矩阵为 B，调色后的人脸图像矩阵为 C，则有如下关系： 后面的融合部分采用这个调色后的图像。 2. 3. 6 融合内核 考虑到该项目的实时性要求与 FPGA 有限的计算资源之间的矛盾，这里提供两种融合内核。根据不同的计算资源与实时性的要求，在项目中可以采用不同的内核。方案 A 是泊松融合内核，方案 B 是前后景+边缘膨胀的内核。总的来说第二种比第一种的融合效果稍差，但是计算的速度更快，因此实时性更好。 方案 A 泊松融合 假定有待克隆的图像区域 g，还有一张背景图片 S，泊松融合能将图像 g 自然融合到背景图片 S 中。其中𝑓与𝑓 ∗代表对应区域的像素值，v 是原图像的梯度场， 是原图， 是边界。实际上就是求下面的式子的最小值。 而这个最小值的解实际对应泊松等式的解： 对应的算法流程如下： Step 1：计算图像 g 的梯度场 v 和背景图片和融合图像的梯度场。 Step 2：求解融合图像的散度场即 Laplace 坐标。 Step 3：用这个 Laplace 坐标和原图求解泊松等式。 方案 B 前后景+边缘膨胀融合前后景的方法如下： Step1：创建需要替换人脸的区域并转为灰度图片，并通过灰度设置阈值对比，建立 mask 区域。 Step2： 分别对需要替换人脸的区域和用来替换的人脸进行掩膜保护，留下需要的图片。 Step3：将人脸区域和用来替换的人脸进行合并。 边缘膨胀： 为了保证融合后的边缘过渡的更加自然，这里采用边缘膨胀进行边缘的完善。 定义像素点的膨胀范围卷积核如下 指定范围为9 × 9的矩阵，表示每个像素点的膨胀范围，对原图像进行卷积操作就可以完成 边缘膨胀。 2. 4 Python 算法与 FPGA 结合的流程 由于这个项目采用的是神经网络、Python 与 FPGA 的联合开发，因此这里有必要对文件在 Vitis AI、DNNDK 中的综合以及在 DPU 中的调用流程进行一定的说明。 文件的综合： 对于采用 TensorFlow 编写的神经网络，首先要生成 frozen_float. pb 文件，然后对该文件进行量化生成 deploy_model. pb 文件。对于采用 caffe 编写的神经网络，首先要生成 float. caffemodel 以及 float. prototxt 文件，然后对这些文件进行量化生成 deploy. prototxt 以及 deploy. caffemodel 文件。在生成上面的文件后，使用 dnnc 工具将上面的文件转换成 model. elf 文件，通过链接生成对应的 libdpumodel. so 文件，然后就可以在 PYNQ 中直接调用了。 文件的调用： 在程序开始时调用 dpuOpen 打开 DPU，然后调用 dpuLoadKernal 将先前综合好的网络模型加载到 DPU 中。调用 dpuCreateTask 为该网络模型创建一个任务，同时调用 dpuRunTask 运行这个网络模型。当这个模型计算完成后，调用 dpuDestroyKernel 释放这个 DPU 内核。最后当全部的计算完成后，调用 dpuClose 关闭整个 DPU。   第三部分 完成情况及性能参数（Final Design &amp; Performance Parameters）   3. 1 FPGA 资源消耗 3. 1. 1 硬件加速 通过 vivado 搭建了神经网络加速的底层 IP 核，vivado 生成的 Block Design，如图 18 所示。图中展示了各 IP 之间的连接关系和数据流的传输过程。 3. 1. 2 DPU 的设置 如图 19 所示，底层采用单一的 DPU 核，并选取 B1152 的 DPU 架构。使用较少的 RAM 并允许通道增强、允许带有维度信息的卷积和平均池化操作，选择的激活函数为ReLU 类。因为 PYNQ 的 DPU 不支持 softmax，因此这里不选用 softmax，softmax 的计算在 ARM 的内核中实现。 3. 1. 3 系统资源消耗 如图 20 所示，系统目前 LUT 占用 68%，BRAM 占用 88%，DSP 占用 96%，FF 占用 59%。 3. 2 图像处理网络模型资源占用情况 3. 2. 1 DenseBox 网络的资源消耗 可以看到 DenseBox 网络代码大小为 0. 09MB，参数占用大约 0. 50MB，乘加操作 485. 38 百万次/秒，IO 存储占 0. 49MB。 3. 2. 2 LandMark 网络的资源消耗 可以看到 LandMark 网络代码大小为 0. 04MB，参数占用大约 0. 77MB，乘加操作 43. 46 百万次/秒，IO 存储占 0. 12MB。 3. 2. 3 DeepFake 网络的资源消耗 可以看到 DeepFake 网络代码大小为 0. 15MB，参数占用大约 28. 64MB，乘加操作 4415. 42 百万次/秒，IO 存储占 0. 57MB。 3. 3 图像处理算法各步骤的结果 首先从视频流中截取出静态图，如图 24 所示 然后经过锚框与人脸特征检测处理，处理结果如图 25 所示 在上面处理的基础上经过点云变换和 DeepFake Model 产生换完脸后的图，同时这里要对换完的脸再次进行特征提取，这几步操作结果分别如图 26 和图 27 所示。 最后采用泊松融合或者前后景+边缘膨胀后接调色+点云匹配的方式将换完的人脸融合到被换脸人的脸上，就可以得到最终的换脸结果如图 28 所示。 3. 4 n2cube 的数据读取 API 优化 最初开发中，我们使用 DPU 在 Python 的 n2cube API 上进行开发，但是在模型推理结束，读取模型结构到内存的过程中我们发现 n2cube. dpuGetOutputTensorInXXX 这几个 API 函数具有较大的性能瓶颈。在读取 Densebox 的80 × 80 × 4 + 80 × 80 × 2的 int8 的结果时耗时接近 300ms，远不能满足实时性的要求。因此我们着手对这几个读取数据的 API 接口进行优化，具体的优化和每步的耗时如图 29 和图 30 所示。  可以看出，优化后的 API 接口在相同数据长度的条件下处理耗时要少得多。通过测试，优化后的算法比优化前的算法快约 30 倍。   第四部分 总结(Conclusions)   4. 1 可扩展之处 （1）从算力角度上讲： 由于 PYNQ-Z2 的计算能力有限，因此一方面视频处理的实时性和效果存在一定的局限性，另一方面无法同时处理音频与视频。之后考虑可以采用算力更高的 Ultra96 开发板进 行音视频的协同 DeepFake，或者采用 FPGA 阵列提高单位时间内的处理能力，甚至在云端接入 GPU，将 FPGA 作为实体输入，加速深度网络的计算。 （2）从算法角度讲： 这里采用的 DeepFake Model 相对比较简单，仅使用了类似 Unet 的 Encoder-Decoder 模型，图像处理的质量存在较大的改进空间，这里可以考虑在算力有了一定提升的基础上在 计算损失函数时增加 GAN 的处理部分，提高图像处理的质量。 "
     }, {
     "id": 28,
-    "url": "/OpenHW/quick-start-guide/",
-    "title": "Quick Start Guide",
-    "body": "2019/01/20 - If you already have a full Ruby development environment with all headers and RubyGems installed (see Jekyll’s requirements), you can create a new Jekyll site by doing the following: # Install Jekyll and Bundler gems through RubyGemsgem install jekyll bundler# Create a new Jekyll site at . /myblogjekyll new myblog# Change into your new directorycd myblog# Build the site on the preview serverbundle exec jekyll serve# Now browse to http://localhost:4000"
+    "url": "/OpenHW/casque-auxil-aiming/",
+    "title": "基于 FPGA 的头盔式辅助瞄准系统",
+    "body": "2019/01/17 - 该作品的设计灵感来自于科幻电影《星际特工》中的头盔控制攻击系统。在战斗场景中，作战人员通过特殊的头盔来直接控制武器对敌人进行准确而有效的打击。在传统战争中，无论是海战、陆战还是空战，作战人员亦或是作战设备几乎都采用的是人眼机瞄的方式进行瞄准打击，其精确度不高而且作战人员还会有不确定的战场意外。我们想要利用 FPGA 的速度优势和摄像头，舵机，MPU 等传感器实现人体姿态解算，全方位目标自动识别追踪以及人员和环境情况监控等功能，进而为作战人员提供一个智能、快捷、安全的作战环境。此系统可以安装在 直升机，步兵战车或海军舰艇的武器平台上，以便于摆脱复杂的武器操作动作， 提高作战效率，提高作战安全性。 作者：强涛， 秋森， 王杰   第一部分 设计概述   1. 1 设计目的 该作品的设计灵感来自于科幻电影《星际特工》中的头盔控制攻击系统。在战斗场景中，作战人员通过特殊的头盔来直接控制武器对敌人进行准确而有效的打击。在传统战争中，无论是海战、陆战还是空战，作战人员亦或是作战设备几乎都采用的是人眼机瞄的方式进行瞄准打击，其精确度不高而且作战人员还会有不确定的战场意外。我们想要利用 FPGA 的速度优势和摄像头，舵机，MPU 等传感器实现人体姿态解算，全方位目标自动识别追踪以及人员和环境情况监控等功能，进而为作战人员提供一个智能、快捷、安全的作战环境。此系统可以安装在 直升机，步兵战车或海军舰艇的武器平台上，以便于摆脱复杂的武器操作动作， 提高作战效率，提高作战安全性。 1. 2 应用领域 该作品的应用领域丰富，主要有以下几个方面的应用： （1）、军事作战： 现代化战争都是信息化、智能化的战争，出现直接的大规模的直接短兵相接的场景并不多，所以在这种形式下就需要有一种能够保证作战人员安全， 可以给作战人员提供方便快捷的作战平台，此系统是佩戴在头上的辅助瞄准系统，作战人员可以直接以头和眼的朝向来控制武器进行作战，实现摆脱常规瞄准方式，迈入“眼睛看到哪儿，武器就指向哪儿”的高级形态。 （2）、反恐侦察： 在很多反恐活动中，武警人员需要实时隐秘地进行现场侦察来获取情况， 从而制定有效的解决方案，但是，实际情况中侦察工作很难安全隐秘地进行，此系统可以由侦察人员佩戴以全地形小车为平台进行安全便捷的实时侦察。 （3）、边境国防： 在传统的国防领域，士兵们必须持枪身处室外进行站岗站哨，这样的话会有不确定的意外因素导致士兵受伤，比如：敌方越境偷袭，国际贩毒等。 此系统可以让边防士兵无需身处室外，直接在室内佩戴辅助瞄准系统，控制外围的边防武器，使边防变得更加安全，具有威慑。 经过我们的实际了解和论证，我们认为将此攻击控制系统应用到军事作战、反恐侦察或者边境国防等领域会有着非常不错的效果。 1. 3 主要技术特点 （1） 该系统使用 MPU9250 高精度姿态传感器，将头部的姿态数据实时解算为三维角度，然后经过控制模块精确控制舵机的转动，从而实现炮台的精确指向，以及头和炮台随动。 （2） 在头盔上使用大量的传感器，利用 UART 和 IIC 等通信方式进行传感器数据的读取与利用。 （3） 自动模式中利用颜色识别，精准识别目标，根据摄像头的可视角和舵 机的方位来建立一个准确的瞄准模型，实现目标和炮台随动。 1. 4 关键性能指标 （1） 准确性：该系统采用了大扭力数字舵机和 MPU 模块以及目标自动识别追踪算法，来对目标进行精确的追踪与打击，准确率 95%以上，误差在 5cm 左右（距离 5m 之内）。 （2） 实时性：由于采用 FPGA 作为主控中心，利用 FPGA 的速度优势，可以以非常快的速度处理各种数据，从而可以在辅助模式和自动模式中以极低的延时控制舵机转动。 （3） 安全性：该系统为头盔式辅助瞄准系统，可以人枪分离，在作战环境中可以极大的保证作战人员的安全，提高战场存活率。 1. 5 主要创新点 （1）整个控制系统运行稳定，具有实时性高、功耗低，准确性高的特点。 （2）该头盔瞄准系统摆脱了传统战争中人眼机瞄的方式，利用 FPGA 的速度优势和摄像头，舵机，MPU 等传感器实现人体姿态解算，全方位目标自动识别追踪以及人员和环境情况监控等功能，进而为作战人员提供一个智能、快捷、安全的作战环境 （3）该系统不仅可以应用在作战环境中，还可以应用在边防，反恐，救灾环境中。   第二部分 系统组成及功能说明   2. 1 整体介绍 本系统主要由依元素科技的 FPGA 开发板—Artix-7 核心板作为主控， 黑金 spartan-6 开发板作为辅助组成。系统主体包括：头盔部分、炮台部分、 操作板部分，详细见下图：   2. 1. 1 实现功能： 该系统为头盔式辅助瞄准系统，使用人员可以通过佩戴头盔与整个系统连为一体，通过不同的模式来切换使用方法，分别是摇杆模式，辅助模式，自动模式。 摇杆模式下，使用人员可以通过摇杆手动控制炮台的朝向进行精确打击，辅助模式下使用人员可以通过头盔上的单目显示器瞄准目标，实现眼睛看到哪儿，武器就指向哪儿的高级形态，自动模式下使用人员可以以最高权限控制炮台发射，炮台则自动搜寻和瞄准目标。 2. 2 各模块介绍 2. 2. 1 UART 通信协议 通用异步收发传输器(Universal Asynchronous Receiver/Transmitter)， 通常称作 UART，是一种异步收发传输器。将数据由串行通信与并行通信间作传输转换，作为并行输入成为串行输出的芯片 UART 是一种通用串行数据总线，用于异步通信。该总线双向通信，可以实现全双工传输和接收。UART 作为异步串口通信协议的一种，工作原理是将传输数据的每个字符一位接一位地传输。其中每一位(Bit)的意义如下： 起始位：先发出一个逻辑”0”的信号，表示传输字符的开始。 数据位：紧接着起始位之后。数据位的个数可以是 4、5、6、7、8 等，构成一个字符。通常采用 ASCII 码。从最低位开始传送，靠时钟定位。 奇偶校验位：数据位加上这一位后，使得“1”的位数应为偶数(偶校验)或奇数(奇校验)，以此来校验数据传送的正确性。 停止位：它是一个字符数据的结束标志。可以是 1 位、1. 5 位、2 位的高电平。由于数据是在传输线上定时的，并且每一个设备有其自己的时钟，很可能在通信中两台设备间出现了小小的不同步。因此停止位不仅仅是表示传输的结束， 并且提供计算机校正时钟同步的机会。适用于停止位的位数越多，不同时钟同步的容忍程度越大，但是数据传输率同时也越慢。 空闲位：处于逻辑“1”状态，表示当前线路上没有数据传送。UART 协议传输时序如图所示： 发送数据过程：空闲状态，线路处于高电位；当收到发送数据指令后，拉低线路一个数据位的时间 T，接着数据按低位到高位依次发送，数据发送完毕后， 接着发送奇偶校验位和停止位（停止位为高电位），一帧数据发送结束。 接收数据过程：空闲状态，线路处于高电位；当检测到线路的下降沿（线路 电位由高电位变为低电位）时说明线路有数据传输，按照约定的波特率从低位到高位接收数据，数据接收完毕后，接着接收并比较奇偶校验位是否正确，如果正确则通知后续设备准备接收数据或存入缓存。 由于 UART 是异步传输，没有传输同步时钟。为了能保证数据传输的正确性， UART 采用 16 倍数据波特率的时钟进行采样。每个数据有 16 个时钟采样，取中间的采样值，以保证采样不会滑码或误码。一般 UART 一帧的数据位数为 8，这样即使每个数据有一个时钟的误差，接收端也能正确地采样到数据。 UART 的接收数据时序为：当检测到数据的下降沿时，表明线路上有数据进行传输，这时计数器 CNT 开始计数，当计数器为 24=16+8 时，采样的值为第 0 位数据；当计数器的值为 40 时，采样的值为第 1 位数据，依此类推，进行后面 6 个数据的采样。如果需要进行奇偶校验，则当计数器的值为 152 时，采样的值即为奇偶位；当计数器的值为 168 时，采样的值为 1 表示停止位，一帧数据接收完成。 一个标准的 10 位异步串行通信协议(包含 1 个起始位、1 个停止位和 8 个数 据位)收发时序，如图所示 图 2. 2. 2 串口通讯 波特率发生器：波特率是衡量数据传输速率的指标，表示每秒传送数据的字符数，单位为 Baud。UART 的接收和发送是按照相同的波特率进行收发的。波特率发生器产生的时钟频率不是波特率时钟频率，而是波特率时钟频率的 16 倍， 目的是为在接收时进行精确地采样，以提取出异步的串行数据。根据给定的晶振时钟和要求的波特率，可以算出波特率分频计数值。 2. 2. 2 IIC 通信协议 I2C(Inter-Integrated Circuit BUS) 集成电路总线，该总线由 NXP（原 PHILIPS）公司设计，多用于主控制器和从器件间的主从通信，在小数据量场合使用，传输距离短，任意时刻只能有一个主机等特性。是一种半双工通信方式。 IIC 的物理层 只要求两条总线线路，一条是串行数据线ＳＤＡ，一条是串行时钟线ＳＣＬ。 每个连接到总线的器件都可以通过唯一的地址和其它器件通信，主机/从机角色和地址可配置，主机可以作为主机发送器和主机接收器。IIC 是真正的多主机总线，（而这个 SPI 在每次通信前都需要把主机定死，而 IIC 可以在通讯过程 中，改变主机），如果两个或更多的主机同时请求总线，可以通过冲突检测和仲裁防止总线数据被破坏。传输速率在标准模式下可以达到 100kb/s,快速模式下可以达到 400kb/s。 连接到总线的 IC 数量只是受到总线的最大负载电容 400pf 限制。 IIC 的协议层 数据的有效性： 在时钟的高电平周期内，SDA 线上的数据必须保持稳定，数据线仅可以在时钟 SCL 为低电平时改变。 起始条件：当 SCL 为高电平的时候，SDA 线上由高到低的跳变被定义为起始条件，结束条件：当 SCL 为高电平的时候，SDA 线上由低到高的跳变被定义为停止条件，要注意起始和终止信号都是由主机发出的，连接到 I2C 总线上的器件，若具有 I2C 总线的硬件接口，则很容易检测到起始和终止信号。总线在起始条件之后，视为忙状态，在停止条件之后被视为空闲状态。 应答： 每当主机向从机发送完一个字节的数据，主机总是需要等待从机给出一个 应答信号，以确认从机是否成功接收到了数据，从机应答主机所需要的时钟仍是主机提供的，应答出现在每一次主机完成 8 个数据位传输后紧跟着的时钟周期，低电平 0 表示应答，1 表示非应答。 I2C 总线上传送的数据信号是广义的，既包括地址信号，又包括真正的数据信号。 在起始信号后必须传送一个从机的地址（7 位），第 8 位是数据的传送方向位（R/T），用“0”表示主机发送数据（T），“1”表示主机接收数据（R）。（这里小编在驱动 MPU6050 模块的时候，就犯过这样的错误，它写的 MPU6050 从机地址是0x68,因为发送从机地址的时候，要加一位读写方向位， 因为刚开始应该是向这个 MPU6050 里写从机里某个寄存器的地址，所以应该是 7 位地址 0x68(1101000)+二进制位 0=11010000）也就是 0xD0,表示要向该 IIC 设备里写东西，然后再紧接着写入 IIC 设备里的寄存器地址，而我直接写 入了 0x68,导致出错}，每次数据传送总是由主机产生的终止信号结束。但是， 若主机希望继续占用总线进行新的数据传送，则可以不产生终止信号，马上再 次发出起始信号对另一从机进行寻址。 2. 2. 3 VGA 显示协议 VGA（Video Graphics Array）视频图形阵列是 IBM 于 1987 年提出的一个使 用模拟信号的电脑显示标准。VGA 接口即电脑采用 VGA 标准输出数据的专用接口。 VGA 接口共有 15 针，分成 3 排，每排 5 个孔，显卡上应用最为广泛的接口类型， 绝大多数显卡都带有此种接口。它传输红、绿、蓝模拟信号以及场与行的同步信号。 VGA 协议简述 VGA 中定义行时序和场时序都需要同步脉冲、显示后沿、显示时序段和显示前沿四部分。VGA 工业标准显示模式要求：行同步，场同步都为负极性，即同步脉冲要求是负脉冲。 由 VGA 的行时序可知：没一行都有一个负极性行同步脉冲，是数据行的结束标志，同时也是下一行的开始标志。在同步脉冲之后为显示后沿，在显示时序段显示器为亮的过程，RGB 数据驱动一行上的每一个像素点，从而显示一行。在一 行的最后为显示前沿。在显示时间段之外没有图像投射到屏幕是插入消隐信号。 同步脉冲、显示后沿和显示前沿都是在行消隐间隔内，当消隐有效时，RGB 信号无效，屏幕不显示数据。 2. 2. 4 JY901 姿态传感器 模块概述： 1、 模块集成高精度的陀螺仪、加速度计、地磁场传感器，采用高性能的微处理器和先进的动力学解算与卡尔曼动态滤波算法，能够快速求解出模块当前的实时运动姿态。 2、 采用先进的数字滤波技术，能有效降低测量噪声，提高测量精度。 3、 模块内部集成了姿态解算器，配合动态卡尔曼滤波算法，能够在动态环境下准确输出模块的当前姿态，姿态测量精度静态 0. 05 度，动 态 0. 1 度，稳定性极高，性能甚至优于某些专业的倾角仪！ 4、 模块内部自带电压稳定电路，工作电压 3. 3v~5v，引脚电平兼容 3. 3V/5V 的嵌入式系统，连接方便。 5、 支持串口和 IIC 两种数字接口。方便用户选择最佳的连接方式。串 口速率 2400bps~921600bps 可调，IIC 接口支持全速 400K 速率。 最高 200Hz 数据输出速率。输入内容可以任意选择，输出速率 0. 1～ 200HZ 可调节。 6、 保留 4 路扩展端口，可以分别配置为模拟输入，数字输入，数字输出，PWM 输出等功能。 7、 具备 GPS 连接能力。可接受符合 NMEA-0183 标准的串口 GPS 数据， 形成 GPS-IMU 组合导航单元。 8、 采用邮票孔镀金工艺，可嵌入用户的 PCB 板中。注意：要加底板或者嵌入到其他 PCB 板子上，MPU9250 芯片下方不能布线，以免干扰到磁力计。 9、 4 层 PCB 板工艺，更薄、更小、更可靠。 性能参数： 1、 电压：3. 3V~5V 2、 电流：&lt;25mA 3、 体积：15. 24mm X 15. 24mm X 2mm 4、 焊盘间距：上下 100mil(2. 54mm)，左右 600mil(15. 24mm) 5、 测量维度：加速度：3 维，角速度：3 维，磁场：3 维，角度：3 维， 气压:1 维（JY-901B）， GPS：3 维（接 GPS 模块） 6、 量程：加速度 :±2/4/8/16 g （ 可 选 ） ， 角速度:±250/500/1000/2000 °/s（可选），角度±180°。 7、 量程：加速度 :±2/4/8/16 g （ 可 选 ） ， 角速度:±250/500/1000/2000 °/s（可选），角度±180°。 8、 姿态测量稳定度：0. 01°。 9、 数据输出内容：时间、加速度、角速度、角度、磁场、端口状态、气压（JY-901B）、高度 （JY-901B）、经纬度（需连接 GPS）、地速（需连接 GPS）。 10、 数据输出频率 0. 1Hz~200Hz。 11、 数据接口：串口（TTL 电平，波特率支持 2400、4800、9600、19200、38400、 57600、115200、230400、460800、921600），I2C（最大支持高速 IIC 速率 400K） 12、 扩展口功能：模拟输入（0~VCC）、数字输入、数字输出、PWM 输出（周期 1us-65535us， 分辨率 1us） 2. 2. 5 指纹模块 模块介绍： 1. 外形尺寸（23. 320. 348. 1） 2. 模块通讯接口为 USB 和 UART 两种通信接口。 3. 供电电压：DC3. 3V，供电电流：&lt;60mA,峰值电流：&lt;60mA 4. 指纹图像录入时间：&lt;1. 0 秒 5. 窗口面积：15. 3×18. 2mm 6. 分辨率：500dpi 7. 模块工作原理 ①指纹特征 指纹算法从获取的指纹图像中提取的特征，代表了指纹的信息。指纹的 存储、对比和搜索等都是通过操作指纹特征来完成的。 ②指纹处理包含两个过程：指纹登陆过程和指纹匹配过程［其中指纹匹 配分为指纹比对（1:1）和指纹搜索（1:N）两种方式］ 。 指纹登录时，对每一枚指纹录入 2 次，将 2 次录入的图像进行处理， 合成模板存储于模块中。 指纹匹配时，通过指纹传感器，录入要验证指纹图像并进行处理，然后 与模块中的指纹模板进行匹配比较（若与模块中指定的一个模板进行匹配，称为指纹比对方式，即 1:1 方式；若与多个模板进行匹配，称为指纹搜索 方式，即 1:N 方式），模块给出匹配结果（通过或失败）。 2. 2. 6 GPS 模块 BLOX 6M GPS 模块，具有高灵敏度、低功耗、小型化、其极高追踪灵敏度大大扩大了其定位的覆盖面，在普通 GPS 接受模块不能定位的地方，如狭窄都市天空下、密集的丛林环境，UBLOX 6M 都能高精度定位。模块的高灵敏度、小静态漂移、低功耗及轻巧的体积，非常适用于车载、手持设备如 PDA，车辆监控、手机、摄像头及其他移动定位系统的应用，是 GPS 产品应用的最佳选择。 2. 2. 7 SYN6288 语音播模块 模块介绍： *清晰、自然、准确的中文语音合成效果；可合成任意的中文文本，支持英文字母的合成； *具有智能的文本分析处理算法，可正确识别数值、号码、时间日期及常用的度量衡符号； *具备很强的多音字处理和中文姓氏处理能力； *支持多种文本控制标记，提升文本处理的正确率； *每次合成的文本量最多可达 200 字节； *支持多种控制命令，包括：合成、停止、暂停合成、继续合成、改变波特率等； *支持休眠功能，在休眠状态下可降低功耗；支持多种方式查询芯片工作状态； *支持串行数据通讯接口，支持三种通讯波特率：9600bps，19200bps、38400bps； *支持 16 级音量调整；播放文本的前景音量和播放背景音乐的背景音量可分开控制； *可通过发送控制标记调节词语语速，支持 6 级词语语速调整； *芯片内固化有多首和弦音乐、提示音效和针对某些行业领域的常见语音提示音； *内部集成 19 首声音提示音，23 首和弦提示音，15 首背景音乐； *最终产品提供 SSOP 贴片封装形式；体积业内最小； *芯片各项指标均满足室外严酷环境下的应用； 2. 2. 8 GY-26 指南针模块  2. 2. 9 SIM900A 短信模块 图 2. 2. 19 SIM900A 模块 模块介绍 物理尺寸: 50mm48mm28mm。 供电: 5V 1A 直流电源。 数据接口： 1. 85V、3. 3V、5VTTL 电平接口；标准 232 接口。 正常工作温度: -30~80°C。 SIM900A 可实现发短信，接收短信，打电话，接听电话等功能。 连接时,需将 SIM900A TXD 与开发板设置的 RXD I/O 相连接,SIM900A RXD 与开发板设置的 TXD I/O 相连接,GND 与开发板上的 GND 相连接。 SIM900A 模块通过发送和接受国际电信联盟规定的 AT 指令集来进行控制和数据接收，本系统用到的 AT 指令集有： 2. 2. 10GY-39 光强模块 GY-39 是一款低成本，气压，温湿度，光强度传感器模块。工作电压 3-5v， 功耗小，安装方便。 其工作原理是，MCU 收集各种传感器数据， 统一处理， 直接输出计算后的结果， 此模块，有两种方式读取数据，即串口 UART（TTL 电平）或者 IIC（2 线）。 串口的波特率有 9600bps 与 115200bps，可配置， 有连续，询问输出两种方式，可掉电保存设置。 可适应不同的工作环境，与单片机及电脑连接。模块另外可以设置单独传感器芯片工作模式，作为简单传感器模块，MCU 不参与数据处理工作。 提供 arduino，51，stm32 单片机通讯程序，不提供原理图及内部单片机源码。 此 GY39 模块另外赠送安卓手机软件 app 查看数据，且支持 wifi 局域内网连接， 手机及电脑同时显示数据。 串口协议： 当 GY-39 模块硬件 PinA（S0）=1 时候使用 （1）、串口通信参数（默认波特率值 9600bps，可通过软件设定） 波特 率：9600 bps 校验位：N 数据位：8 停止位：1 波特率：115200 bps 校验 位：N 数据位：8 停止位：1 （2）、模块输出格式，每帧包含 8-13 个字节（十六进制）： ①. Byte0: 0x5A 帧头标志 ②. Byte1: 0x5A 帧头标志 ③. Byte2: 0x15 本帧数据类型 （参考含义说明） ④. Byte3: 0x04 数据量 ⑤. Byte4: 0x00~0xFF 数据前 高 8 位 ⑤. Byte5: 0x00~0xFF 数据前低 8 位 ⑥. Byte6: 0x00~0xFF 数据 后高 8 位 ⑦. Byte7: 0x00~0xFF 数据后低 8 位 ⑧. Byte8: 0x00~0xFF 校验和（前面数据累加和，仅留低 8 位）Byte2 代表的含义说明：Byte2 0x15 0x45 0x55 含义： 光照强度温度、气压、湿度、海拔 IIC 地址       （3）、数据计算方法 ①光照强度计算方法（当 Byte2=0x15 时,数 据 :Byte4~Byte7 ） ： Lux=( 前 高 8 位 T=(0x0B&lt;&lt;&lt;24)   (0x97&lt;&lt;16)   (C4&lt;&lt;&lt; IIC_ADD=0xB6 (8bit iic_add) 则 7bit iic_add 为 8bit iic_add 右移 1bit 得 0x5b   （4）、命令字节，由外部控制器发送至 GY-39 模块（十六进制） 1、所 有串口指令格式，帧头：0xa5 指令格式：帧头+指令+校验和(8bit) 2、串口命令指令： ①，串口输出配置寄存器： command Bit7 Bit6 Bit5 Bit4 Bit3 Bit2 Bit1 Bit0 输出命令 AUTO 0 0 0 0 0 BME MAX AUTO（默 认 1）1:上电后按照上次的输出配置输出，0：上电后不自动输出 bit6-bit2 必需置零：00000 BME（默认 1） 1:连续输出温度、气压、湿度、海拔 0: 不输出； 当 Auto 置 1，掉电保存 MAX（默认 1） 1:连续输出光照强度 0: 不输出； 当 Auto 置 1，掉电保存 命令格式：0xA5+command+sum 例： bit7(Auto=1), bit0(MAX=1) 发送命令：0xA5+0x81+0x26，表示连续输出光照强度，掉电后保存该设置，重新上电后将 自动连续输出光照强度； 2. 2. 11红外测温模块 图 2. 2. 22 红外测温模块 模块介绍： GY-MCU90614 是一款低成本温度模块。工作电压 3-5v 功耗小，体积小。其工作原理，是通过单片机读取红外温度传感器数据，串口（TTL 电平） 通信方式输出。 串口的波特率有 9600bps 与 115200bps 有连续输出与询问输出两种方式， 可设定 ID,如果应用在 485 总线时候， 可以挂多个传感器在总线上。 2. 2. 12气压高度模块 模块介绍： MP280 气压传感器是专为移动应用。该传感器模块是使用一个非常紧凑的封装。它的 小尺寸和低功耗允许在电池供电的移动电话等设备的使用。BMP280 已 探明的压阻式压力传感器技术具有精度高、线性度以及长期稳定性和鲁棒性高的电磁兼容。许多设备操作选项提供灵活性，优化的功耗的装置，分辨率和滤波器的性能。 模块内部自带电压稳定电路，可以兼容 3. 3V 的嵌入式系统，连接方便。 采用先进的数字滤波技术，能有效降低测量噪声，提高测量精度。 采用邮票孔镀金工艺，品质保证，可嵌入用户的 PCB 板中。 性能： 1、电压：2. 1V~3. 3V 2、电流：2. 5mA（3. 3V 10HZ） 1. 0mA（3. 3V 0. 1HZ） 3、体积：15. 24mm X 15. 24mm X 2mm 4、焊盘间距：上下 100mil(2. 54mm)，左右 600mil(15. 24mm) 5、输出内容：气压，高度。 6、波特率：115200 7、回传速率：10 5 2 1 0. 5 0. 2 0. 1HZ 可选 8、量程：气压：300～1100HPa 9、测量精度： 高度：0. 5M 10、数据接口：串口（UART TTL 电平，） 11、数据格式：数字输出（ASCLL 码） 通信协议： 2. 2. 13温湿度传感器 AT 指令集： 数据处理： 2. 2. 14数字舵机 2. 2. 15超声测距模块 超声波是震动频率高于 20khz 的机械波。它具有频率高、波长短、绕射现象小、 方向性好、能够成为射线而定向传播等特点。 本模块的使用方法是：一个控制口发一个 10us 以上的高电平，就可以在接受口 等待高电平输出。一有输出就可以开定时器计时，当此口变为低电平时就可以读 定时器的值，此时就为此测距的时间，方可算出距离。如此不断的周期测，就可 以达到移动测量的值了。 模块参数： 使用电压：DC5V 静态电流：小于 2mA 电平输出：低 0V 感应角度：不大于 15 度 探测距离：2CM-450CM 高精度：可达 3MM 工作原理： ①采用（IO 触发测距、给至少 10us 的高电平信号） ②模块自动发送 8 个 40KHZ 的方波、自动检测是否有信号返回 ③有信号返回、通过 IO 输出一高电平、高电平持续的时间就是超声波从发射到返回的时间、测试距离（高电平时间*声速（340M/S)12) 时序图： 电气特性及注意事项: ①建议测量周期 60MS 以上，以防止发射信号对回响信号影响； ②测距时，被测物体面积要大于 0. 5 平方米且平面尽量平整； ③电源供电不要低于 5V，否则会影响测试结果。 2. 2. 16烟雾检测模块 MQ135 气体传感器所使用的气敏材料是在清洁空气中电导率较低的二氧化 锡(SnO2)。当传感器所处环境中存在污染气体时，传感器的电导率随空气中污染气体浓度的增加而增大。使用简单的电路即可将电导率的变化转换为与该气体浓 度相对应的输出信号。 MQ135 气体传感器对氨气、硫化物、苯系蒸汽的灵敏度高，对烟雾和其它有害气体的监测也很理想。这种传感器可检测多种有害气体，是一款适合多种应用的低成本传感器。 电气性能： 输入电压：DC5V 功耗（电流）：150mA DO 输出：TTL 数字量 0 和 1（0. 1 和 5V） AO 输出：0. 1-0. 3V（相对无污染），高浓度电压 4V 左右 特别提醒：传感器通电后，需要预热 20S 左右，测量的数据才稳定，传感器发热属于正常现象，因为内部有电热丝，烫手是属于不正常现象。 2. 2. 17语音识别模块 YS-LDV7 模块为一体化语音识别模块，可对用户的语音进行识别。 支持中文音素识别，可任意指定中文识别词条（最好小于 8 个字）。识别词条个数为 50 句。可对 0. 2 秒至 3. 2 秒的语音命令进行响应，响应时间约为 0. 4 秒至 1. 2 秒。安静环境下，标准普通话，识别率大于 95%。 其与计算机或者单片机之间采用串口进行通讯，模块串口采用的是 3. 3V/5. 0V TTL 电平标准进行通信。 模块参数如下图： 2. 2. 18火焰检测模块 该模块可以检测火焰或者波长在 760 纳米～1100 纳米范围内的光源，探测角度在 60 度左右，对火焰光谱特别灵敏（灵敏度可通过电位器调节），对火焰的探测距离：跟灵敏度和火焰强度有关，一般 1m 以内适用（以打火机 火焰测试，半米内能够触发传感器），工作电压 3. 3V-5V。 2. 2. 19SDRAM 控制器 SDRAM（Synchronous Dynamic Random Access Memory），同步动态随机存储器。同步是指内存工作需要同步时钟，内部的命令的发送与数据的传输都以它为基准；动态是指存储阵列需要不断的刷新来保证数据不丢失。这里的随机指的是数据的存储不是线性依次存储，而是自由指定地址进行数据读写。SDRAM 具有空间存储量大、读写速度快、价格相对便宜等优点。然而由于 SDRAM 内部利用电容来存储数据，为保证数据不丢失，需要持续对各存储电容进行刷新操作；同时在读写过程中需要考虑行列管理、各种操作延时等，由此导致了其控制逻辑复杂的特点。因而在一般使用中，我们将其封装为 FIFO 接口，使用时只需要向操作 FIFO 那么简单，就可以操作 SDRAM。 SDRAM 的内部是一个存储阵列。可以想象成一个表格，我们可以对每一个表格中的每一个单元格进行操作，单元格也是他的存储单元，向这样的一个单元格， 我们称其为“L-Bank”，一般 SDRAM 有四个 bank。 SDRAM 的存储容量计算：SDRAM 总存储容量 = L-Bank 的数量×行数×列数 ×存储单元的容量。 在使用 SDRAM 时候，需要其不断地自刷新。来确保其数据不丢失，因此在读写模块正在工作的时候需要进行刷新的时候，必须退出读写进行刷新。 由于 SDRAM 是电容存储的原件，所以在使用前需要上电初始化。 100us 的延时需要在任何操作之前除过 NOP 和 INHIBIT 命令。这两个命令必须在 200us 期间应用并且持续在这个区间结束后。（这句话不懂什么意思）在满足上述条件后，precharge 命令应该被应用在 100us 延时以后。所有的 bank 必须预充电，这将使得所有的 bank 进入 idle 状态。在两个 auto refresh 命令之 后，SDRAM 准备进行模式寄存器配置。 就是说这里需要上电后进行（1）最少 100us 的延时。之后所有 bank 进入 idle 状态，然后进行（2）两次 auto refresh 状态。之后对其进行（3）模式寄存器配置。使用 TimeGen 辅助软件画出波形图。如下图。 模式寄存器配置可以按照用户的需求进行配置，下图是数据手册中给出的官方解释 这里的仿真后续和 SDRAM 的其他操作结合进行仿真。 SDRAM 的自刷新 SDRAM 是电容存储元件，所以使用过程必须通过刷新来保证数据的不丢 失。经计算得出 15us 刷新周期，所以代码使用 15us 计数器，每 15us 进行 一次刷新。在进行刷新的时候，同样需要根据时许进行命令的使用。 SDRAM 的读写操作 SDRAM 的读写操作时序基本一致，这里对写模块进行分析，读模块只是在命令上有不同，在读命令收有一段时间的潜伏期，数据才会读出。这里的读写都使 用突发长度为 4，也就是一次写入 4 个数据。 这里是一次的写操作。当然，在具体的应用中，我们不可能只写入 4 个数据， 所以将在后文的仲裁模块对写时序内部进行更好的处理，使其可以满足我们的应用需求。 在几个基本模块使用完成之后，需要对几个模块之间的状态跳转进行描述约束。 这里使用 Visio 画出的状态跳转图，将所有的状态连接在一起。在任意状态，都可以保证刷新时间到来时进行刷新。这里的所有请求信号都是在使能信号到来。 2. 2. 20微型单目显示器    第三部分 完成情况及性能参数   3. 1 系统整体完成情况： 系统主要由三部分组成，分别是：头盔部分、炮塔部分以及操控板部分。 1、头盔部分主要由各种传感器以及一个微型单目显示器组成，传感器负责采集当下的环境信息，微型单目显示器实时显示摄像头所拍到的画面。 2、炮塔部分主要由一个 2 度云台，一个波箱，一个旋转舵机，两个摄像头组成， 云台控制波箱的朝向，旋转舵机负责和摄像头负责目标的搜寻与预警。 3、操控板主要由一个串口屏，一个指纹模块，一个摇杆模块，一个语音识别模块以及语音播报模块组成，串口品为控制中心和显示中心，指纹模块负责解锁进 入系统，摇杆模块负责控制炮台朝向，语音识别以及语音播报模块辅助操作。 4、摇杆模式下，操作者通过摇杆和微型单目显示器控制炮台的转动从而精确打击 目标。 5、辅助模式下，操作者可以用头盔和微型单目显示器，通过头的摆动显示器的瞄准来瞄准目标实现精确打击同时还可以通过头盔上的各种传感器来检测人体和环境的信息 6、自动模式下，炮台自动预警搜寻目标，当识别到目标时语音报警并且炮台自动瞄准，通过操作人员决定击打，当目标消失时语音提醒，炮 台转为继搜寻状态。 3. 2 部分模块介绍： 3. 2. 1 MPU 姿态检测模块 角度输出格式 实现方法： MPU 自动将数据通过 UART 协议发送到 FPGA 开发板，FPGA 开发板将数据流接收并在众多数据流中检测到与角度匹配的数据，及那个角度数据存储并进行姿态角解算公式将姿态解算出来实现头部姿态的测量。 实现性能： 在实际使用中，MPU 的解算数据和头部运动的角度完全一致，误差不到 2 度， 同步率较高，延时在 300ms 左右，基本可以实现头部姿态数据的同步测量。 3. 2. 2 指纹解锁模块 数据加密算法（DES）简介 密码的生成采用借鉴数据加密算法(DES)。DES 算法是一种分组加密算 法，他以 64 位的分组数据进行加密。密匙通常为 64 位，但每个第 8 位通常作为奇偶校验位，实际密匙为 56 位。 DES 算法的流程：输入明文通过初始置换，将其分为左右两段各 32 位 的两个部分，然后进行 16 轮完全相同的运算。经过 16 轮运算后左、右部分合并在一起经过一个末置数，算法结束。见下图 3. 9。 在每一轮具体运算中，密匙位移位，然后从密匙的 56 位中选取 48 位。 通过扩展置换，将数据的右半边扩展成 48 位，并通过一个异或操作与一个 48 位密匙结合，通过 8 个 S 盒将这 48 位替换成新的 3 位数据，再通过一次置换操作。  将输入的 20 位数据扩展成 30 位的明文数据，该操作是为了产生与密匙长度一样的数据进行异或等操作。异或的结果进行 S 盒替代，将数据压缩至 18 位。密匙的产生通过用户打开天窗时随机输入产生。最后将 S 盒中所得数据经过 P 盒置换，得到最终密码。因为在整个监护系统中数据传输基本由 ASCII 码格式传输，就将最后产生的密码转换成 ASCII 码格式。  安全性分析 DES 算法的安全性主要由非线性 S 盒模块和密匙模块决定。 1. 非线性 S 盒模块是按照 DES 算法的要求设置的。可靠性很高。 2. 因为密码只需要通过明文生成，而不需要通过密码翻译明文数据，故密匙采用时刻流动的数据，大大提高了安全性。 3. 2. 3 串口屏模块 我们的项目主要是通过串口屏进行控制，当触摸到串口屏特定的热区时，它就会通过串口发送相应的键值到 FPGA 开发板上，我们采用 UART 通信协议的接受模块接收，根据发来的键值跳转到不同的状态，使 FPGA 中状态机的状态与串口 屏的显示界面一致。并且根据串口屏发来的键值进行发送相关的指令，同时在状态机检测到串口屏进入特定的页面时，会向串口屏发送相应的显示信息进行显示， 例如温度、海拔、指南针等。图 3. 3. 5 为串口屏指令接收发送模块 RTL 图，本模块负责接收串口屏发来的信息，并将接收的信息发送给指令控制模块进行处理。 并根据指令控制模块传来的指令向串口屏发送对应的显示指令，包括各传感器的数据以及模式跳转指令等。 3. 2. 4 角度分析与控制 该系统由三种模式，摇杆模式通过摇杆控制舵机的转动角度，辅助模式通过 MPU 姿态数据进行舵机的控制，自动模式通过摄像头的图像处理算法得出目标的位置信息控制舵机转动，本模块将所有控制信号进行处理并在相应模式下控制舵机二度云台进行精准的转动，经过实际使用测量，该模块的控制信息处理非常准确，有着较好的稳定性和通用性。 3. 2. 4 SIM9001A 短信模块 SIM9001A 模块通过发送和接受国际电信联盟规定的 AT 指令集来进行控 制和数据接收，我们使用了 UART 通信协议的发送模块进行指令的发送。该模块会定时向用户发送信息，其中短信内容包括了由 GPS 定位模块所传送过来的数据 实时位置，经度、纬度等等，对于设备和使用者有一定的安全保障。 3. 2. 5 目标预警搜寻模块  系统由 OV5640、SDRAM 两模块构成，通过配置 OV5640 不断提取 RGB 值并通过 FIFO 存放入 SDRAM 当中读取，后对数据进行实时逐帧处理，以达到动态捕捉目标的位置并输出其坐标值的功能。 首先将从 SDRAM 读出的数据从 RGB565 转换成 RGB888,然后将其从 RGB 转成 YCBCR 的格式，同时算出目标特征颜色的 CB,CR 的阈值，阈值是通过将目标的图片生成 mif 文件然后取出其中分布最多的最大和最小值，然后算出其 CBCR 的值，该范 围就是目标特征的阈值。然后通过该阈值将图象二值化，得到二值化图像后，由 于外部因素图象会出现一些噪点，然后通过开运算，即先腐蚀再膨胀来滤除多余 的图象噪点，但是由于非目标上也会出现目标颜色，所以需要对目标有效点进行计数，当大于一定的阈值后，认定该目标为有效目标，否则舍弃该目标，该阈值通过试验得到最佳阈值。为了得到目标物体的像素点坐标，由于有非目标颜色存在，所以最小包围盒算法不是很适合。所以我们用了另外一种算法，当检测出目标后，通过对有效点 x,y 坐标的累加以及有效点的计数，然后将累加后的坐标除以有效点的数量，来得到平均像素点坐标，然后将该像素点的坐标通过另一个的模块的运算输出给舵机，然后进行对目标的追踪。   第四部分 总结   4. 1 可扩展之处 （1）在目标识别中，对目标的特征可以提取的更加充分，比如识别目标的形状，或者其他一些可以精准识别的特征，以此来对目标识别的更加准确。 （2）可以使用光流法或者其他方法对目标运动轨迹进行预测，以便于更精确的打击目标。 （3）可以增加一些对使用人员的生命特征检测，环境信息检测，以便于更好的保护使用人员的安全。 （4）可以将很多个该系统的数据通过无线传输到一个总系统中，以便于各个系统可以实时共享信息。 （5）可以将该系统搭载到一些小型机器人上，来实现一些反恐作战或者搜救任务。 "
     }, {
     "id": 29,
-    "url": "/OpenHW/markup-example/",
-    "title": "Markdown Example",
-    "body": "2019/01/19 - You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated. Something. To add new posts, simply add a file in the _posts directory that follows the convention YYYY-MM-DD-name-of-post. ext and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works. Jekyll also offers powerful support for code snippets: def print_hi(name) puts  Hi, #{name} endprint_hi('Tom')#=&gt; prints 'Hi, Tom' to STDOUT. Check out the Jekyll docs for more info on how to get the most out of Jekyll. File all bugs/feature requests at Jekyll’s GitHub repo. If you have questions, you can ask them on Jekyll Talk. "
+    "url": "/OpenHW/Video-encry-decry/",
+    "title": "基于 FPGA 的图像及视频加密解密系统",
+    "body": "2019/01/17 - 在多媒体技术高度发展的今天，视频信息安全愈发受到人们的关注。传统的视频加密方法主要应用在软件层面上，其算法设计复杂、加密速度慢，不适用于视频的实时加密。FPGA 器件凭借高带宽全并行的特性可以实现高速运算和视频采集，能够满足视频的实时性要求，但开发难度较大。ARM 器件具备易于开发 的优势，但其运算速度低。图像的保密技术主要有图像加密技术和图像隐藏技术两种。解密通过与加密算法配套的解密操作与密钥，获得原始图像的信息，从而可以有效的保护原始图像的隐秘性和信息的安全传输。 基于 FPGA 的图像及视频加密解密系统作者：林泽南；崔忠仁；陈沛杰   第一部分 设计概述   1. 1 设计目的 在多媒体技术高度发展的今天，视频信息安全愈发受到人们的关注。传统的视频加密方法主要应用在软件层面上，其算法设计复杂、加密速度慢，不适用于视频的实时加密。FPGA 器件凭借高带宽全并行的特性可以实现高速运算和视频采集，能够满足视频的实时性要求，但开发难度较大。ARM 器件具备易于开发 的优势，但其运算速度低。图像的保密技术主要有图像加密技术和图像隐藏技术两种。解密通过与加密算法配套的解密操作与密钥，获得原始图像的信息，从而可以有效的保护原始图像的隐秘性和信息的安全传输。 因此，本次比赛我们使用自制的 FPGA 板卡完成图像及视频加密解密系统， 发挥 FPGA 的高并行性及 FPGA 的 IP 核重用优势，对比传统软件上实现的图像加密解密速度慢，具有实时高速的优点。本设计使用 Zynq7020 芯片采用自制的 双 hdmi 拓展板，结合 FPGA 与 ARM 的优势。在硬件层面分为加密端和解密端， 加密端实现基于摄像头传感器的视频实时采集、加密和密匙流动态配置功能；解密端实现基于 hdmi in 数据的实时读取、解密、并通过 hdmi out 接口输出。在软件算法层面主要结合了基于 Logistic 混沌序列的像素加密手段和基于 Arnold 猫映射的图像置乱加密手段，具体内容见下面章节介绍。 1. 2 应用领域 此技术可应用于传输含有个人隐私、企业信息、国家机密等重要信息的视频及图像数据，如安防监控、视频会议等。 1. 3 主要技术特点 在算法层面上，首先通过确定好图像像素的地址，通过运用 Arnold 猫映射对确定好的像素地址进行置乱。由于该操作不会改变像素本身的值，存在被暴力破解的风险。因此在经过上述操作后，还需要通过使用 Logistic 混沌映射对像素点本身的值进行置乱，改变像素点的值，保证图像的安全性。 在硬件层面上，线性反馈位移寄存器所产生的伪随机序列具有良好的相关 性，运用该特性实现混沌图像加密算法硬件化。 1. 4 关键性能指标 （1）密钥空间 （2）密文图像的相邻像素间的相关性 （3）密图的信息熵 （4）输出视频的帧率 1. 5 主要创新点 （1）结合图像与视频的相关性，在静态图像加密技术的基础上完成彩色视频加密技术的开发； （2）加密算法方面，结合了 Logistic 混沌映射图像扩散算法和 Arnold 猫映射图像置乱算法，具有较好的抵抗统计学、信息熵和差分攻击能力，保证了图像的安全性； （3）运用 Zynq 系列芯片，在 FPGA 上完成视频的采集、加密、解密和显示， 在 ARM 上完成数据的传输以及各模块的调用，充分结合了 ARM 易开发和 FPGA 高性能、低功耗的优势。   第二部分 系统组成及功能说明   2. 1 整体介绍 本设计使用 Zynq7020 芯片采用自制的双 hdmi 拓展板，结合 FPGA 与 ARM 的优势。 在硬件层面分为加密端和解密端，加密端实现基于摄像头传感器的视频实时采集、加密和密匙流动态配置功能；解密端实现基于 hdmi in 数据的实时读取、解密、并通过 hdmi out 接口输出。下面分别是加密端整体框图和解密端整体框图。 加密端框图： 解密端框图： 2. 2 各模块介绍 （1）OV7670 图像采集模块： 此模块主要的任务是配置外部摄像头和拼接视频流数据。采用 SCCB 接口对外界 OV7670 摄像头内部寄存器进行配置，同时提供 XCLK 时钟源联合控制摄像头的帧率，显示分辨率等一系列参数。 （2）HDMI_OUT 图像并转串输出模块： 此模块主要功能是完成对物体识别模块的视频流转化为 TMDS 差分信号，并完成时钟的配置驱动外部 HDMI 显示器或者接入另一块板卡的 hdmi 输入接口。 （3）HDMI_IN 图像串转并输入模块： 此模块主要功能是完成对物体识别模块的视频流转化为 TMDS 差分信号，并完成时钟的配置驱动外部 HDMI 显示器。显示器将实时显示双摄像头的画面，在有入侵情况下完成对物体的框选，使监控更直观方便。 （4）基于 Arnold 猫变换&amp;logistic 混沌序列图像加密模块： 该模块主要完成了对于一帧图像数据的 Arnold 置乱加密与基于 logistic 混沌序列的像素点加密。其中置乱次数及密匙流为加密双方提前约定，固化与此 ip 中。采用 axi4-s 的视频流数据格式，基于 xilinx 的视频流标准，具有较好的可移植性。 （5）基于 Arnold 猫变换&amp;logistic 混沌序列图像解密模块： 该模块主要完成了对于一帧图像数据的 Arnold 逆置乱解密与基于 logistic 混沌序列的像素点解密。注意两者顺序与加密模块正好相反，其中置乱次数及密匙流为加密双方提前约定，固化与此 ip 中。采用 axi4-s 的视频流数据格式，基于 xilinx 的视频流标准，具有较好的可移植性。   第三部分 完成情况及性能参数   Matlab 仿真加密效果： 3. 1 灰度直方图统计 图像的灰度直方图可以反映图像中像素灰度的分布情况，通过图像灰度的分布特点来进行图像的恢复，攻击者可以利用这一特性对加密图像进行攻击。如果 加密后的图像的灰度值分布没有规律可循，攻击者也就无法通过像素灰度的分布特征来恢复图像。我们通过 matlab 仿真运算得到基于 Arnold 猫变换&amp;logistic 混沌序列图像加密算法的加密后拥有较好的加密效果。 3. 2 像素点相关性分析 图像的各相邻像素之间通常有一定的相关性，攻击者如果能够利用好这个现 象就有机会对加密图像实施攻击。所以对加密者而言，能否降低图像像素间的相关性是评价加密算法是否可行的一个重要依据。所以引入相关系数来衡量图像相 邻像素间的相关性。可以看到原图的水平、垂直和对角线方向的相邻像素相关性 很强，而加密后的图像水平、垂直和对角线方向上的相邻像素间相关系数值很小， 尤其是水平方向上的相关系数，为 5. 186×10-4，远小于 0. 01，即相关性很弱。   第四部分 总结   4. 1 可扩展之处 （1）视频图像采集格式为 RGB888，即一个像素会占用 24bit 的空间，由这种格式组成一幅 640x480 的图像需要 1MB 左右，这种原始视频数据对于存储器的容量有很高的要求，对于后续的视频处理和传输工作都有很大的局限性。因此，后续可以设计一些算法对视频数据进行压缩，为存储器腾出空间，提高存储空间资源。 （2）本系统中采用 HDMI 实现加密视频数据板间传输，这种传输方式距离近，暂时无法远距离传播。因此，后续可以加入以太网等网络传输方式对视频进行传输，以推广该技术的应用。 "
     }, {
     "id": 30,
-    "url": "/OpenHW/customer-service/",
-    "title": "What is Jekyll",
-    "body": "2019/01/18 - No more databases, comment moderation, or pesky updates to install-just your content. Markdown, Liquid, HTML &amp; CSS go in. Static sites come out ready for deployment. Permalinks, categories, pages, posts, and custom layouts are all first-class citizens here. Sick of dealing with hosting companies? GitHub Pages are powered by Jekyll, so you can easily deploy your site using GitHub for free-custom domain name and all. What is Jekyll?: Jekyll is a simple, blog-aware, static site generator. You create your content as text files (Markdown), and organize them into folders. Then, you build the shell of your site using Liquid-enhanced HTML templates. Jekyll automatically stitches the content and templates together, generating a website made entirely of static assets, suitable for uploading to any server. Jekyll happens to be the engine behind GitHub Pages, so you can host your project’s Jekyll page/blog/website on GitHub’s servers for free. "
+    "url": "/OpenHW/DL-face-detect/",
+    "title": "基于深度学习的人脸检测系统设计文档",
+    "body": "2019/01/17 - 新冠病毒的肆虐让整个 2020 年笼罩在恐慌之中，戴口罩成了人们外出必备 的“新日常”。新冠病毒主要通过飞沫传播和接触传播，正确选择佩戴口罩，可有效阻隔病毒传播。但在人流量庞大的商圈、车站等场所，仍有许多人拒绝佩戴口罩。若能在这些场所进行当前人群口罩检测，则能有效避免冠状病毒的传播。 作者：韦社年 朱庭威 张华蕾   第一部分 设计概述   1. 1 设计目的 新冠病毒的肆虐让整个 2020 年笼罩在恐慌之中，戴口罩成了人们外出必备 的“新日常”。新冠病毒主要通过飞沫传播和接触传播，正确选择佩戴口罩，可有效阻隔病毒传播。但在人流量庞大的商圈、车站等场所，仍有许多人拒绝佩戴口罩。若能在这些场所进行当前人群口罩检测，则能有效避免冠状病毒的传播。 本作品是一种能实时检测识别人脸口罩佩戴情况并进行语音播报的系统，准确度高达 95. 2%，系统处理速度可达 25fps 左右。除此之外，本作品具备较高的可拓展性，稍加更改就可在更多的领域得到应用。 1. 2 应用领域 基于深度学习的人脸捕获及口罩检测系统可以适用于人流量大的场所，实现 了人脸检测与跟踪以及人脸口罩识别的功能，并将识别结果进行播报，可以辅助疫情防控工作的开展。 除此之外，本系统的人脸检测系统有着广泛的应用范围。 ⚫ 在智能家居领域，可以通过我们的系统实现人类闯入报警装置，在摄像头捕捉到的区域检测到人脸后触发报警； ⚫ 在新冠疫情期间，我们的系统可以安装在商圈、旅游景点，实时检测人流密度，为实时限流措施提供参考。 1. 3 主要技术特点 对密集人群进行口罩检测，首先要在画面中进行人脸检测。 在非深度学习阶段的目标检测算法都是针对特定目标提出的，比如 CVPR 2001 的 Viola-Jones (VJ)[1]是针对人脸检测问题，CVPR 2005 的 HOG+SVM[2]是针 对行人检测问题，TPAMI 2010 的 DPM[3]虽然可以检测各类目标，但要用于多目标检测，需要每个类别分别训练模板。而强大的深度学习只要一个 CNN 就可以 搞定多类别检测任务。虽然这些都是多类别方法，但它们也都可以用来解决单类别问题。 本作品是基于深度学习的人脸捕获及口罩检测系统，通过片外的图像传感器采集图像到片上缓冲区，而后把图像送到 FPGA 上的神经网络加速器进行处理， 识别结果输出到显示器，在显示器中框出人脸并显示目标是否佩戴口罩，我们还使用语音模块对画面中的总人数和未戴口罩人数作出播报。 1. 4 关键性能指标 本作品可以实时检测识别人脸口罩佩戴情况，我们从帧率和精度两个方面进行了分析。识别精度可达到 95. 2%，而系统延迟仅仅 40ms 左右，可达到 25fps 的帧率。 1. 5 主要创新点 神经网络部分创新点 1、使用了一个轻量级 backbone，去除了 BN 层，在精度达到优秀的前提下极大提升了速度； 2、去掉了 FPN 结构，仅降低微小的精度却大大提升了速度(20%)； 3、在网络的 head 部分对边框回归和类别预测做了不对称设计，进一步提升性能。 系统框架创新点 1、为了加快系统设计，采用了 Xilinx 专用于卷积神经网络的深度学习处理单元（DPU）。在设计系统过程中，可根据系统的具体情况配置 DPU 的参数，将该 IP 集成到所选器件 PL 中，通过 PS 端软件控制，实现多种卷积神经网络的加速。 2、利用 PYNQ 框架，可以在开发板上动态地加载比特流实现系统所需硬件电路，灵活方便。 3、利用 Vitis AI 编译模型，将浮点模型转换为定点模型，降低了计算复杂度，并且需要的内存带宽更少，提高了模型速度。   第二部分 系统组成及功能说明   2. 1 整体介绍 基于深度学习的人脸检测系统由 PS 端、PL 端与外设及其接口组成。其中， 外设包括、摄像头（通过 USB3. 0 连接）、语音模块（通过 UART 连接）和 VGA 显示（通过 Mini DP 转 VGA 连接），开发板内部还提供了 2GB 的 LPDDR4；PS 端包括 openCV 采集处理模块、后处理模块、语音控制模块及显示控制模块；PL 端包括特征提取模块和边框回归及分类模块。在 PS 端的模块中，openCV 采集处理模块的主要功能是控制摄像头采集图像，并对 LPDDR4 中的图像进行预处理；后处理模块的主要功能是使用非极大值抑制（Non-Maximum Suppression， NMS）算法对候选区域进行筛选，得到合适的区域信息并统计画面中检测到的人脸总数；语音控制和显示控制驱动语音模块和摄像头构成结果展示部分，语音控制模块根据后处理模块的结果播报当前画面中的人脸数目，而显示控制模块根据 VGA 时序显示拍摄画面并框出人脸位置。PL 端中的特征提取模块对预处理后的图像进行计算，得到大小不同的区域，边框回归及分类模块处理这些区域，给出边框信息与分类结果。 本系统的开发平台为 Ultra96-V2 开发板，是基于 Arm 的 Xilinx Zynq UltraScale +MPSoC 开发板，并基于 Linaro 96Boards Consumer Edition（CE）规范构建。 Ultra96-V2 开发板系统框图如下图所示： 2. 2 各模块介绍  OpenCV 采集处理 本系统采用的是超微 1601U 摄像头上图所示，输出图像大小为 1280×720， 最高帧率可达 30fps。该摄像头通过 USB3. 0 接口与开发板连接，输出图像的数据格式支持 MJPEG 和 YUV 格式。它还支持自动曝光控制 AEC 和自动白平衡 AEB，可以调节亮度、对比度、色饱和度、色调等基础参数。 通过系统 PS 端的 OpenCV 来完成摄像头相关参数的配置以及图像帧的获取， 之后对获取的图像进行resize等预处理再送到PL部分的深度学习处理单元（DPU）进行处理。  后处理对于一帧图像，该模块接收到来自神经网络检测模块的 3780 个候选框信息 （包括边框坐标、识别标签、置信度）。后处理模块首先对这些候选框进行筛选， 留下置信度大于 0. 6 的候选框。这一步可以减少无效候选框的处理时间。接着， 我们使用非极大值抑制算法对通过筛选的候选框进行处理，去除重复的候选框， 得到最优结果。最后将结果输出给结果展示部分。 非极大值抑制，顾名思义就是抑制不是极大值的元素，可以理解为局部最大 搜索。这个局部代表的是一个邻域，邻域有两个参数可变，一是邻域的维数，二是邻域的大小。例如在行人检测中，滑动窗口经提取特征，经分类器分类识别后， 每个窗口都会得到一个分数。但是滑动窗口会导致很多窗口与其他窗口存在包含或者大部分交叉的情况。这时就需要用到 NMS 来选取那些邻域里分数最高（是行人的概率最大），并且抑制那些分数低的窗口。  结果展示部分——语音控制 本系统中语音模块的功能是在系统检测完毕且后处理模块统计画面人数后， 将检测结果通过语音的方式播报给外界。语音模块 JQ8900-16P 选用了 SoC 方案， 集成了一个 16 位的 MCU，能够灵活更换 SPI-flash 内的语音内容，有一线串口控制模式和 RX232 串口控制模式可选。 由于开发板上有多个 USB 接口，我们采用 USB 转串口的方式来控制语音模块。具体控制方式为把检测到的人数转化为语音模块的控制指令，通过串口发送到该模块，语音模块对指令进行解码之后播报存放在该模块内的相应音频。  结果展示部分——显示控制经过神经网络处理之后的图像由开发板上的 Mini DP 接口外接 Mini DP 转 VGA 转接头，连接到 VGA 显示器进行显示。  识别模块本系统中卷积神经网络模块的功能是对摄像头采集图像中的人脸进行检测并判断目标人脸上是否佩戴口罩，是系统的核心模块。本小节将从数据集的制作、 特征提取模块、软件模型设计和硬件模型设计等四个方面介绍该模块。 （1）数据集的制作 数据集主要来自于 WIDER Face 和 MAFA 数据集，加入了上百张戴口罩的 图片（来源于网络）。具体地，我们从 WIDER Face 中筛选出 7000 张，从 MAFA 中筛选出 2000 张，自己根据已有的戴口罩的数据集生成了 2000 张左右，最终分为训练集 13000 张，测试集 300 张。值得一提的是，在我们自己生成的数据集图片中，有许多是将有口罩的图片与无口罩的图片的组合，如图 6 最右所示，因为在经典数据集中很难找到这样的情况。 2）神经网络模型的搭建和训练 本系统采用的目标检测算法为 anchor-base 的 one-stage 算法，整个网络参考 了 RetinaNet[4]进行设计，可分为 backbone、neck、head 三大部分。其中，backbone 参考 BlazeFace[5]的设计去掉了 BN 层，这样能在不影响准确率的前提下提高速度。 在 RetinaNet 的 neck 部分中，FPN[6]有很好的特征提取功能，引入 FPN 能解决较为复杂的问题。但由于 FPN 需要额外的卷积计算，它也在一定程度上降低了速度。由于本次应用只有两个类别，有口罩和无口罩，识别困难度比较低，我们参考了 SSD[7]的结构，去掉 FPN 部分，仅用一个卷积层调整通道。对于 head 部分， 由于只有两个类别，我们减少了 class 分支的卷积层，不再与 boxes 分支对称。 减少卷积层并没有引起精度下降，但进一步提升了速度。 我们 anchor 设置如下： 总共有(24×40+12×20+6×10)×3=3780 个 anchor，最小尺寸为 20，最大尺 寸为 127。 整体网络框架如下所示： 整体网络可分为两部分——特征提取模块与边框回归及分类模块。 对于特征提取模块的处理如图 6 所示。令输入图像为 P0，其尺寸为 192×320； P1 由 P0 经过一个卷积层和两个 blaze_block 得到，P1 经过三个 blaze_block 得到 P2 ； P3 由 P2 经 过 三 个 double_blaze_block 得来， P4 由 P3 经过三个 double_blaze_block 得来，P5 由 P4 经过三个 double_blaze_block 得来。P3、P4 和 P5 是本模块的输出，即识别模块的输入。其中 blaze_block 由 DepthwiseConv2D + Conv2D + MaxPool2D + Add 组成，double_blaze_block 由 DepthwiseConv2D + Conv2D + DepthwiseConv2D + Conv2D + MaxPool2D + Conv2D + Add 组成。各层 参数详见本文附录中软件模型的源代码。 边框回归及分类模块对 P3、P4、P5 进行分析。RetinaNet 类别分支和边框分 支分别采用了四个卷积层，本设计采用了 RetinaNet 的 head 设计思想，但是进行 了改进：我们减少了卷积层的数量，边框分支采用三个卷积层，类别分支采用两个卷积层。因为只有两个类别，所以我们的类别分支和边框分支采用了不对称设计，将类别分支的卷积层进一步减少。减少类别分支的卷积层对准确率几乎没有影响，但提升了速度。 （3）硬件部分 该部分利用支持 PYNQ 框架的开发板镜像。首先通过在开发板上加载带 Xilinx 的 DPU IP 的比特流文件，把 DPU 烧写到开发板的 PL 端；再通过安装在开发板镜像上的 DPU 驱动，调用相应的 API 把经过 Vitis AI 编译过的模型部署到 DPU 中；最后启动 DPU 读取预处理之后的图像进行检测和分类，DPU 运算完之后取出运算结果，对运算结果进行解析之后得到人脸框的坐标以及是否佩戴口罩的分类结果。   第三部分 完成情况及性能参数   3. 1 完成情况 本系统目前可以实现： ⚫ 实时检测并跟踪人脸位置，人脸位置被框出； ⚫ 人脸检测框上方给出目标是否戴口罩 mask/nomask 以及置信度； ⚫ 定时对当前人数与未佩戴口罩人数进行语音播报。 3. 2 人脸检测性能指标 本系统基于人脸捕捉及口罩识别的应用对 RetinaNet 进行优化，并利用硬件加速，大大提升了处理速度。目前该系统可对 192×320 大小的三通道彩色视频进行实时处理，帧率可达 25fps，精度可达 95. 2%。   第四部分 总结   4. 1 可扩展之处 目前系统图像采集时间占总体时间的比例比较大，后期可探索更多软硬件优化的方法对图像采集部分进行优化，提升系统帧率。除此之外，目前我们的应用是进行口罩（人脸）的检测，未来可在此基础上进行拓展加入识别模型，识别模型可以精确识别出是哪一个人，这样可将应用范围进一步拓展，比如说门禁的人脸识别、签到、智能监控等等。 "
     }, {
     "id": 31,
-    "url": "/OpenHW/charm-old-cities/",
-    "title": "Platform and resources",
-    "body": "2019/01/18 - Any current Xilinx platform, including PYNQ, and Alveo, can be used for the Open Hardware Design Contest. Participants can also enter using Amazon AWS EC2 F1, Nimbix, and other cloud providers. Teams can use any platform supported by the Vivado design suite. XUP FPGA boards include the Basys 3, the Nexys 4 DDR, and the Nexys Video. Recommended Zynq and Zynq Ultrascale+ boards include the PYNQ-Z1, PYNQ-Z2, ZUC104, and Ultra96 from Avnet. Vivado and Vitis software can be used. Vitis is a new unified software platform that enables a broad range of developers - including software engineers and AI scientists - to take advantage of the power of hardware adaptability. Vitis is free-or-charge and available to download from www. xilinx. com/downloads PYNQ platforms PYNQ is an open-source project that makes it easier to use Xilinx platforms. Using the Python language and libraries, designers can exploit the benefits of Xilinx platfroms to build more capable systems. For more on PYNQ see www. pynq. io The PYNQ-Z2 from TUL is the recommended platform for getting started with PYNQ. The PYNQ-Z2 includes a Zynq Z7020, 512 MB DDR3 memory, 2x Pmods, Arduino, and Raspberry Pi headers. For more information, please see the TUL PYNQ-Z2 page The ZCU104 is a Zynq Ultrascale+ board from Xilinx, supported by PYNQ. The board features a Zynq UltraScale+ MPSoC XCZU7EV, 2 GB DDR4 Memory, HDMI, DisplayPort, USB 3. 0, LPC FMC. For more information, please see the Xilinx ZCU104 webpage The Ultra96 from Avnet is a Zynq Ultrascale+ board supported by PYNQ. The board features a Zynq UltraScale+ MPSoC ZU3EG, 2 GB DDR4 Memory, Wi-Fi / Bluetooth, Mini DisplayPort, USB 3. 0. For more information, please see the Avnet Ultra96 page Compute Acceleration platforms Xilinx Alveo are PCIe boards intended for compute acceleration and the recommended platform for the Open Hardware “Compute Acceleration” category. Current boards include the Alveo U50/U200/U250/U280. Free remote access to Alveo hardware is available to academics through the Xilinx XACC program For more information see the Xilinx Alveo webpage Amazon EC2 F1 is a compute instance with Xilinx Virtex Ultrascale+ devices that you can program to create custom hardware accelerators for your application. AWS-F1 can be used for the Open Hardware “Compute acceleration” category. For more information, see the XUP AWS F1 page "
-    }, {
-    "id": 32,
-    "url": "/OpenHW/article-1/",
-    "title": "基于SEA的飞机大战游戏",
-    "body": "2019/01/17 - 基于 SEA 的飞机大战游戏卞思格；宋长骏；陈炜鑫   第一部分 设计概述   1. 1 设计目的 我们设计了一款基于 SEA 的飞机大战游戏。飞机大战游戏是一款休闲益 智类游戏，既简单又耐玩。在初始界面，我们有开始游戏、重新开始、皮肤 选择和结束游戏四个选项。开始游戏后，玩家可以用游戏手柄方便的控制飞 机在屏幕上向任意方向移动，通过躲避子弹和射击敌机得分，在屏幕左上角 可以看到当前生命和得分。 1. 2 应用领域 最近的一些复古游戏网上商店吸引了许多喜欢老式电子游戏的买家。一 些爱好者一直在收集复古游戏产品，一些普通玩家也开始收集旧式磁带和 CD，还有小时候玩过的游戏机。 虽然复古游戏只占全球 1090 亿美金游戏行业的一小部分，但确是非常 有吸引力的缝隙市场。该游戏平台可以作为一个复古游戏机使用，经过后期 加工改良，可以将游戏移植到专用游戏机或手机等设备上，供玩家使用。这 款飞机大战游戏，可以放松心情，释放压力，提高反应能力。 1. 3 主要技术特点 （1） 在 BRAM 资源较少的情况下，采用了图片压缩编码的方式，以较少 的数据量来表示原来的像素矩阵。 （2） 我们编写了游戏的主菜单和控制逻辑，游戏功能丰富，界面美观。 （3） 我们外接了自制游戏手柄，可以直插在开发板上，方便地控制游戏。 1. 4 关键性能指标 （1） 游戏界面美观，飞机图标清晰，游戏动画显示流畅； （2） 游戏手柄上的摇杆与按键灵敏度高、指令延迟小 1. 5 主要创新点 （1） 使用了自制游戏手柄，相比普通按键，能更方便地控制游戏，提升用 户体验。 （2） 在板载 BRAM，资源较少的情况下，采用了图片压缩编码的方式，以 较少的数据量来表示原来的像素矩阵。   第二部分 系统组成及功能说明   2. 1 整体介绍 系统硬件由 SEA 开发板（型号 xc7s25ftgb196-1）、游戏手柄拓展板和 HDMI 显示屏组成。FPGA 读取按键和摇杆的状态，来控制游戏显示的内容， 其中，FPGA 通过 IIC 方式来读取摇杆的状态。游戏总体控制模块分为按键 功能控制、主菜单控制、游戏逻辑控制和文字图片信息显示控制四个方面。 根据玩家不同的指令，HDMI 屏上显示相应的内容。 2. 2 各模块介绍 根据总体系统框图，给出各模块的具体设计说明。 （1） 游戏总体控制模块 按键功能控制：不同的按键对应不同的指令，该模块主要负责按键消 抖与指令转化。 主菜单控制：游戏初始界面的主菜单有开始游戏、重新开始、皮肤选 择和结束游戏四个选项。可以通过按键上下移动光标，选择不同功能。 游戏逻辑控制：该模块主要进行了游戏规则的设计。 显示模块：主要负责文字显示和飞机图标、子弹显示。 （2） HDMI 显示驱动模块：驱动 HDMI 屏，在屏上流畅的显示游戏界面。 （3） 游戏手柄驱动模块：驱动手柄上的 PCF8591 芯片，输出摇杆的位置状 态。 （4） IIC 通信模块：实现游戏手柄和 FPGA 的通信，FPGA 读取 PCF8591 输出的数据。   第三部分 完成情况及性能参数   显示的菜单如图 3 所示，可以上下移动光标选择相应的功能。游戏界面如图 4 所示，实现了摇杆控制飞机朝任意方面移动。图片清晰，画面显示流畅，指令 延时小，并且游戏规则正确，可以给玩家良好的游戏体验感。完整作品如    第四部分 总结   4. 1 可扩展之处 A. 利用板载的 esp32 模块，实现脱机下载。 B. 可以存储一些其他游戏，设计个游戏选择菜单。 C. 利用板载的蓝牙模块，实现联机游戏。 D. 增加游戏音乐部分 "
+    "url": "/OpenHW/AImusic-on-GRU/",
+    "title": "一种含基于GRU网络硬件加速器的AI编曲SoC",
+    "body": "2019/01/17 - 本作品旨在设计能够在硬件端实现 AI 编曲的 SoC，对复调音乐编曲并进行实 时推理和播放。其中以 Arm Cortex-m0 为控制器内核，对多种板载外设进行调度， 同时搭载基于 GRU 的神经网络硬件加速器，用来推理和谐的音符序列，最后由音频 DAC 实现音频输出。 一种含基于GRU网络硬件加速器的AI编曲SoC作者：相博镪；胡双；邹金成   一、设计概述   1. 1 设计目的 本作品旨在设计能够在硬件端实现 AI 编曲的 SoC，对复调音乐编曲并进行实 时推理和播放。其中以 Arm Cortex-m0 为控制器内核，对多种板载外设进行调度， 同时搭载基于 GRU 的神经网络硬件加速器，用来推理和谐的音符序列，最后由音频 DAC 实现音频输出。 1. 2 应用领域 基于 FPGA 平台将神经网络模型部署到硬件，能够适用于某些室外场景下的即兴伴奏，或是聆听音乐地需求。并允许对编曲没有基础的人，在任意时刻能够最快获得一段只属于自己的和谐音乐。 1. 3 主要技术特点 设计中核心部分是基于 GRU 模型的硬件运算加速器模块。针对神经网络模型大量乘加运算的特点，我们使用 16 路 16bit 乘法器作为并行乘法阵列，在 80MHz 的时钟频率下实现高速运算。 系统以 arm cortex-m0designstart eval 作为软核 cpu，并搭载多个外设。其中 TF 卡预先存储了 46 个音符对应的 5 秒音源，以及 PC 端训练得到的约 26 万个 神经网络模型参数；DDR3 SDRAM 在系统初始化时将 TF 卡内容读入作为缓冲。 针对 GRU 较为复杂的运算流程和数据调度，我们为硬件加速器设计了一组 轻量的指令集，cpu 凭藉于此，通过写寄存器的方式，命令加速器实现数据加载、运算等一系列动作，降低纯 HDL 设计的复杂度，同时提高了模块的可复用性。 1. 4 主要创新点 其中神经网络使用一种基于 GRU 和 Embedding 模型的 TonicNet 网络，这种网络较好地兼顾了编曲的乐理特点和更低的运算复杂度，在生成音乐较为和谐的同时，也非常适合使用硬件实现。 （1）指令集架构控制数据流向和运算流程。为了更好地兼顾设计中的细节， 更好地将数据流的转移和运算高度契合在一起，我们放弃了 HLS 等高层次设计工具，而是以 Veriog 编写整个模块，其中仅利用了基础加法器、乘法器，FIFO 以及 DDR3 控制器 IP。同时嵌入了指令集的思想，使得整个运算模块能够通过 CPU 的 总线指令进行调度，在保留高速运算特性的同时又不失灵活易重构易调度的特点。 （2）将 AI 编曲迁移到硬件实现。传统 AI 编曲往往运行在或部署了 GPU 的计算机，而本作品将推理部署到 FPGA 芯片后，联合片外存储器，声卡芯片即能和其他电声设备共同工作。   二、系统组成及功能说明   2. 1 整体介绍 根据设计需求，我们设计了如图 1 所示的 SoC。 ARM Cortex-M0 软核处理器作为主控，通过 AHB 总线对各个外设模块实现控制。 TF 卡预先保存了 PC 端训练的神经网络模型参数和 46 个音符对应的 5 秒音源，在系统启动时，CPU 通过 SPI 读取数据并搬移到 SDRAM；2 组 GPIO 读按 键、拨码开关、控制 LED 灯；i2c 与 i2s 用来和声卡芯片交互；DDR3 SDRAM 控制器选择仲裁其他设备的数据请求。 神经网络的运算流程以 TonicNet 为原型，并根据硬件特点进行实现。其中数据以 16-bit 有符号定点数保存和运算，并能够利用指令配置小数点位置，用以在数值区间和精度间自由取舍；Sigmoid 和 tanh 激活函数部分使用流水线的结构进行，以二次多项式拟合的方式实现；后处理时的指数运算由于对精度要求不高，因此直接使用查找表实现；多项分布部分使用 LFSR 产生随机数，再由累加的形式来模拟按概率取值；神经网络计算完毕后交由 cpu 进行后处理，将结果和音符形成映射关系，再取出音符对应音源，最后由音频 DAC 输出。 2. 2 UART/SPI/GPIO/TIMER 我们的 SoC 搭载了两个 UART 外设。其中 UART0 用来向用户打印 log 信息， UART1 用来和外界传输数据。PC 端利用 pytorch 库读取神经网络模型参数文件，并利用 pyserial 库来实现串口发送，与此同时硬件系统通过 UART1 实现和 PC 的数据交互，并通过 SPI 将数据写入 TF 卡相应扇区。 同样，我们利用 matlab 读取 46 个音源的 wav 文件，并将其波形转换为 16-bit 有符号数，通过 UART1 写入 TF 卡相应扇区。利用 SD 卡作为大容量移动存储器，可以便捷地调整实际应用中需要的模型参数和音乐播放音源，也正契合了我们在硬件部署 AI 编曲后随用随听的目的。 2. 3 DDR3 SDRAM 控制器 我们的 DDR3 SDRAM 控制器基于 vivado 的 MIG IP，为了实现多设备控制仲 裁，以及位宽的转换，我们在 MIG 的基础上进行封装。 在我们的系统中，存在 3 个设备需要直接访问 SDRAM。cpu 在系统初始化时 通过 AHB 总线将 SD 卡中的数据缓存至 SDRAM；神经网络模块在计算过程中需要不断地从 SDRAM 中读取模型参数；音频播放模块需要由要播放的音符类型， 来从 SDRAM 中取出音源数据，缓冲后交由音频 DAC 播放。 2. 4 音频 DAC 控制器 在初始化时，需要通过 I2C 来对音频 D/A 芯片进行配置，我们可以通过软件写寄存器的方式，配置好工作模式、音量、采样率等参数后，再利用 I2C 完成写入。 在需要进行音乐播放时，软件程序写控制模块寄存器，表明需要播放的音 源在 SDRAM 中的储存地址，以及要播放的样本数，控制模块将数据读入 FIFO 及逆行缓冲，最终通过 I2S 向音频芯片发送数据，在开发板 line out 接口插入耳机或音响，即可聆听最终的音乐输出。 作品使用的模型生成复调音乐，因此需要在同一时刻对多个音符取音源， 合成后进行播放。软件程序通过写参数寄存器和指令寄存器的方式，告知音频 控制模块需要播放的音符在 SDRAM 中存储的位置，播放长度，以及对应的轨道，接下来播放模块判断轨道对应 FIFO 的状态，以在合适的时机取出音源数据 播放。 2. 5 神经网络模型和加速器模块 随着近些年深度学习的飞速发展，AI 编曲领域也日益高涨。较为闻名的有 已经将之商业化的 AVIV，以及 Google 开源的 Magenta。其中大多以基于 RNN， CNN 或其变体为主，并按编曲风格融入某些乐理规则进行正则。要生成和谐的 音乐，通常对模型要求较为复杂，google 的 wavenet 模型利用因果卷积直接生成音频波形，magenta 也大多使用注意力机制，但在硬件实现这些模型时，要比传统的 CNN 和 RNN 在计算流程上要复杂得多。我们评估了大量主流的 AI 编 曲模型后，选择了一种模型相对简单，效果较为出色的模型作为我们硬件实现 的原型。 2. 5. 1 模型仿真 我们使用 TonicNet 模型作为原型，这是一种基于 RNN 的神经网络模型，首先使用词嵌入（embedding 模型）为输入音符数据建模，接下来利用三层 output channel 为 256 的 GRU 网络进行推理，再通过一层全连接层得到神经网 络的输出，最后融入乐理规则对输出结果后处理，得到四条音轨，作为最终的 编曲输出。如图 5 所示，为某次模型输出 midi 标准的数据后，利用 musescore3 软件解析出的乐谱。 GRU 和 LSTM 是 RNN 网络的变体，为解决 RNN 长期记忆和反向传播中的梯 度等问题而来。相较于 LSTM，GRU 通常能够以更精简的计算结构，得到相似的实验效果。 当前时刻的输入 Xt 和上一时刻的输出 Ht-1 被输入进 GRU 模型，并送入更新门 rt 和重置门 zt。更新门用于控制前一时刻的状态信息被带入到当前状态中的程度，重置门控制前一状态有多少信息被写入到当前的候选集上。 公式(2-1)至公式(2-4)构成了一个标准的 GRU 模型结构。在实际应用中，不 同的功能需求下对模型有着不同的要求。如图 7，在本作品使用的模型中，主 要可以分为三部分：    词嵌入模型。模型的输入有两个部分，xt和 zt。xt作为当前时刻的输入， 是由前一时刻的输出迭代而来，zt是由上一时刻的输出特性，经过后处理而来。得到 xt和 zt后，将其映射为特定向量的形式，这一过程称为词嵌入（word embedding）。     GRU 模型。将词嵌入后映射得到的向量输入至 GRU 模型。本作品中使用 了三层 GRU，输入通道为 288，输出通道为 256，每层 GRU 的运算结果分别作为当前时刻下一层的输入 xt，以及下一时刻当前层的输入 ht，以此类推在整个 网络中进行传递。   输出层和后处理。第三层 GRU 网络将某一时刻运算结果输出至全连接层 如公式(2-5)，得到维度为 98 的向量输出。至此神经网络部分在当前时刻运算完毕。而后处理，则是将输出向量的 98 个元素先分别进行指数运算实现非线性映射，接下来按概率随机抽取，即最终得到当前时刻的输出音符，最后再按照旋律的行进规则进行调整，作为神经网络下一时刻的输入。2. 5. 2 硬件实现 选定模型后，我们以此为原型进行硬件设计。大体有如下几点：    对原模型进行 16-bit 量化。利用 pytroch 读出在 PC 端预先训练好的参数 文件，并仿真统计出运算过程中最值后，将参数转换为 16-bit 定点数，我们选择一位符号位，三位整数位，和十二位小数位。其中在计算输出层时，需要调节为五位整数位，十位小数位来防止溢出，这一步可使用配置寄存器的方式自 动实现。完毕后，按照 2. 2 节中阐述的方式，将定点化后的参数写入 Micro SD 卡。     设计运算单元。类似于线性层的运算结构实际上就是矩阵乘法，各通道 间的运算是独立且规整的，因此非常适合利用并行运算做加速。我们综合考量了模型结构、需要的运算速度，以及 FPGA 可利用资源，最终选择使用 16 路 16-bit 并行乘法阵列作为加速器的核心，在 80MHz 的时钟频率下通过 3 个 cycle 得到乘积，再以加法树的形式得到乘加结果。除此之外累加运算模块、sigmoid 运算模块、tanh 运算模块以流水线的方式进行。为了进一步提高速度，Sigmoid 和 tanh 我们使用二次多项式分段拟合的方式，而不是传统的 CORDIC；考虑到 计算过程中对指数运算精度要求不高，本工程中直接取查找表实现；最后需要 按概率对输出结果向量取索引，这里我们先对输出向量求和，同时利用 LFSR 产 生伪随机数，将随机数对和取模后，判断模值在向量的位置，即可类似于取样得到的所求索引。     数据流控制。如图 8 所示，cpu 通过对寄存器写入指令的方式来控制整个运算流程。首先，cpu 向加速器模块各参数寄存器写值，来配置指令将要操 作的地址、数据量和操作模式，写入完毕后对指令寄存器写指令，经加速器模块控制器解析后，来启动所要进行的运算流程。  首先，cpu 告知加速器，本轮计算的输入值所对应的词嵌入向量在 SDRAM 中的地址，加速器将其取出到缓冲 data_in 中。再依次取出当前计算所需要的 bias 和 weight 到相应缓冲，由控制器根据指令按相应的方式进行并行乘加运 算。所有的运算结果汇总到缓冲 data_out 中，其中缓冲 data_tmp0 和 data_tmp1 能在某些特殊运算中自动拷贝 data_out 的运算结果。缓冲 data_r， data_z 是 GRU 运算流程中需要的特殊缓冲，data_h 在 GRU 每层计算完毕后更新其运算结果。当当前时刻的 gru 和输出层均计算完毕后，进入硬件实现的最终阶段，将结果向量元素分别进行指数运算，并将结果作为其索引所对应的概率，按照多项分布的形式模拟从中抽取，将抽取结果的索引作为当前时刻硬件端的最终结果，通过中断的形式告知 cpu 本时刻运算完毕。 2. 6 软件程序 在本系统中，cpu 负责启动时对所有模块初始化、控制调度，以及计算结果的后处理。 当整个系统复位，首先程序声明后处理需要用到的变量，接下来对 UART、 TIMER、GPIO、SPI、音乐播放模块、DDR3 SDRAM 控制器模块，以及神经网络加速器模块进行初始化，完毕后串口打印欢迎信息。 各模块初始化完毕后，进入工作前的准备阶段。CPU 利用程序从 SD 卡读出 神经网络模型参数数据，以及各音符对应的音源，写入 DDR3 SDRAM，以便后续工作状态下能够将数据高速读出。 数据准备完毕后，程序赋予神经网络一个初始值，功能开始运作起来。在本程序中，神经网络加速器模块并不是始终运行，而是为播放功能做数据准备。程序循环查询播放模块的状态寄存器，当播放缓冲的数据低于一个阈值，程序就启动神经网络加速器模块运算，得到结果后将要播放的数据放入播放模块缓冲中， 以此来实现整个系统实时播放的目的。   三、完成情况及性能参数   本作品的设计功能全部完成，包括 SoC 结构搭建、软件程序设计、存储器控 制部分、音乐播放部分，以及神经网络加速器模块。最终通过 cpu 软件调度，SoC系统将神经网络加速器运算得到的 MIDI 标准音符，通过播放模块实时输出到音频 DAC 芯片，利用耳机或音响连接开发板的 LINE OUT 音频接口即能够聆听到 AI 编曲作乐。    SoC 架构完成。使用 Arm cortex-m3designedstart 作为软核 cpu，工作在 40MHz 时钟频率下。外设部分 UART、SPI、GPIO、timer 使用了 Verilog IP；DDR3 SDRAM 控制模块在 vivado MIG IP 的基础上进行封装，使得多个设备能够访问存储器；音频 DAC 控制模块在 i2c 和 i2s 的基础上加入 FIFO，封装 AHB 接口以及其 他逻辑实现配置和播放；神经网络加速器模块和软件程序完全由我们设计，并最终将整个系统连接起来。     神经网络运算部分完成。对所选模型进行评估，我们的模型原型 TonicNet 网络在其论文中提到了仍存在的问题。其模型以 JSB 作为训练数据集，这是一种 四声部和声的数据集，对应了生成标准 midi 格式的四个轨道。在此基础上提出 了多种训练模型，如图 10 展示了以 16 分音符为时间序列步长下，多种基于 TonicNet 的模型在 JSB 训练集下的损失。其中 C 表示和弦（Chord），S 表示高音声部（Soprano），A 表示中音声部（Alto），T 表示次中音（Tenor），B 表示低音声 部（Bass）；NCL 即 No Chord Loss，表示仅对 note 音符进行了评估；Tr 和 MM 分别表示对数据集进行了和弦转位，以及进行了大调-小调转换来增强数据集。  论文中还提到了输出结果仍然会存在某些 16 分音符存在偏离其对应声部的趋势，以致产生不和谐的装饰音效果。使用集束搜索有时生成序列过短。有时会突然发生大调转小调或者相反的情况。这些问题可能是由于使用 teacher forcing 训练 TonicNet 时由于误差的存在而导致的棋盘效应。 我们对 TonicNet 的运算结构进行评估，并将其作为原型进行硬件实现。 在实际硬件实现过程中，16 路 16-bit 并行乘法阵列在 80MHz 时钟频率下以 流水线的方式进行运算。对于输入通道为 256 的一组向量，每个乘积求和得到一 次并行乘法运算结果，需要消耗不少于 16 个时钟周期，再与 Bias 和前次结果累加，实现完整的 W*x+B 运算。 我们作品中选择 XC7A75TFGG484 作为 FPGA 芯片，最终实现后，资源利用如 图 11 所示：  音频播放部分基本完成。音频 DAC 芯片使用 WM8978，将以 16 位有符号 数保存的音源数据输出到开发板 line out 接口。在播放过程中，尽管以 16000Hz 采样率对音源播放足够，但输出的模拟信号存在直流偏置，实际播放效果存在稍明显的噪音，这也是我们后续工作中要继续调试的部分。   四、总结   4. 1 可拓展之处 由于开发时间仓促，我们虽然完成了最初设想的功能，但在这个过程中，我们不断地发现可以继续优化的地方，其中既包括对加速器速度和计算架构的优化， 也有如神经网络模型，以及仿真和开发流程的优化。这也是我们接下来的工作中 索要继续进行的。    并行乘法阵列改为流水线方式计算。我们当前使用的计算结构中，数据读入、数据运算以及结果数据的三个过程在执行中需要等待前一过程执行完毕，因此运算还不能足够密集。在接下来的工作中，我们将以流水线的操作方式优化这 一部分设计。     加速器对指令的执行过程加入缓冲方式。在本系统中，软件程序向加速器 写入一条指令完毕后，需要通过查询状态寄存器或等待中断的方式来得知当前指令执行完毕，才能写入下一条指令。但实际上可以使用指令缓冲的方式，即 cpu 一次写入多条指令，加速器悉数接收后放入缓冲，等待当前指令执行完毕后自动 从缓冲中读入下一条指令，这样既解放了 cpu，也提高加速器自身响应指令的速 度。     优化存储器控制模块。在本系统中有多个设备访问了 DDR3 SDRAM 存储 器。其中加速器模块和播放模块可以在工作状态下由仲裁器和选择器直接高速访问 SDRAM，但 CPU 在准备阶段需要利用 spi 从 Micro SD 卡向 SDRAM 搬运数据， 这一步受限于程序的运行速度，因而拖慢了准备过程。后续我们将优化 SPI 到 SDRAM 间的控制，提高数据流速度。     调整加速器架构，提高兼容性。最初为了解决 GRU 相较于传统线性网络、 卷积网络以及循环网络更复杂的结构，我们设计了指令集的形式结构，来降低纯 verilog 开发复杂度的同时，提高了灵活性和配置性。但实际上现在所用的指令操 作中仍有不合理的地方，在接下来的工作中，我们将调整指令集结构，以在运算 更高效的前提下，提高对其他网络的兼容性，能够适用于更多的网络模型结构。     继续添加音源，实现对电子音乐设备的支持。由于我们采用的是神经网络生成 midi 标准音符，再利用播放器播放音源的方式实现，这样就能兼容大量电子音乐设备，比如可直接连接电脑或混音器，得到更丰富的音乐合成效果。     使用更丰富的训练集，优化乐理规则约束，训练更多风格的音乐。本系统 中我们以 Tonicnet 模型为原型实现硬件加速，但实际上 AI 编曲相关模型远远不局限于此。后续我们将继续尝试进行其他相关模型的硬件加速实现。  将神经网络加速器集成到 SoC 具有较好的前景和实用性。在设计过程中，可 以根据不同需求来定制如 GPIO、UART、音频播放、VGA 显示等外设模块。而由 于不同神经网络模型也会有大量相似类型的运算，如乘加是基础，一般还会有池化、激活函数等运算，这些相通的运算类型非常适合集成到神经网络加速器中做 运算加速，除此之外像预处理和后处理有时逻辑复杂但运算量不大，这部分任务 可以交给 cpu 完成，最终软硬结合来实现整个运算流程。   "
     }];
 
 var idx = lunr(function () {
@@ -545,10 +540,10 @@ function lunr_search(term) {
             <div class="mb-5 d-flex justify-content-between main-loop-card">
 <div class="pr-3">
 	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/article-1/">基于SEA的飞机大战游戏</a>
+	<a class="text-dark" href="/OpenHW/social-distance-detecting/">社交距离检测装置</a>
 	</h2>
 	<p class="excerpt">
-	   基于 SEA 的飞机大战游戏
+	   2019 年末，新冠疫情爆发, “保持人与人之间距离”的倡议也逐渐成为大家的共识。但事实上，在人流密集场合中，社交距离的保持时常被大家忽视。如何实时监测社交场合中人与人的距离，也成为一大难题。这也坚定了我们设计社交距离检测器的想法。
 	</p>
 	<small class="d-block text-muted">
 		In <span class="catlist">
@@ -565,8 +560,253 @@ function lunr_search(term) {
 </div>
 
 	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/article-1/">
-	<img class="w-100" src="/OpenHW/assets/images/airforce_game_cover.jpg" alt="基于SEA的飞机大战游戏">
+	<a href="/OpenHW/social-distance-detecting/">
+	<img class="w-100" src="/OpenHW/assets/images/social_distance_detecting_cover.jpg" alt="社交距离检测装置">
+	</a>
+	</div>
+
+</div>
+          
+        
+        
+        
+          
+         
+            <div class="mb-5 d-flex justify-content-between main-loop-card">
+<div class="pr-3">
+	<h2 class="mb-1 h4 font-weight-bold">
+	<a class="text-dark" href="/OpenHW/mulfps-integrationcam-cover/">基于多帧融合的智能相机处理系统</a>
+	</h2>
+	<p class="excerpt">
+	   本设计针对低照度高动态情况下，单帧图像曝光不足导致的图像噪声大、色彩失准等问题，在传统的 HDR 多帧融合（Frames Merging）方法上，采用层次化的图像配准（Image Alignment）方案、自适应白平衡（White Balance）与色调映射（Tone Mapping）策略，在降低图像噪声、真实还原景物色彩的基础上，极大 抑制了多帧融合时常见的运动...
+	</p>
+	<small class="d-block text-muted">
+		In <span class="catlist">
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
+		
+		</span>
+	</small>
+	<small class="text-muted">
+		Jan 17, 2019
+	</small>
+</div>
+
+	<div class="col-md-3 pr-0 text-right">
+	<a href="/OpenHW/mulfps-integrationcam-cover/">
+	<img class="w-100" src="/OpenHW/assets/images/mulfps_integrationcam_cover.png" alt="基于多帧融合的智能相机处理系统">
+	</a>
+	</div>
+
+</div>
+          
+        
+        
+        
+          
+         
+            <div class="mb-5 d-flex justify-content-between main-loop-card">
+<div class="pr-3">
+	<h2 class="mb-1 h4 font-weight-bold">
+	<a class="text-dark" href="/OpenHW/magneticfield-scan/">磁场扫描仪</a>
+	</h2>
+	<p class="excerpt">
+	   磁场测量是研究物质特性、探索未知世界的有效手段之一，广泛应用于 水下通信、空间磁场探测、地质勘探等军事和民用领域[1]。本作品是为了设计实现出一款快速低功耗小型化的磁场扫描仪，通过扫描的方式来得到该区域的磁场测量图像，为后续的探测或检测提供磁场图像数据。
+	</p>
+	<small class="d-block text-muted">
+		In <span class="catlist">
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
+		
+		</span>
+	</small>
+	<small class="text-muted">
+		Jan 17, 2019
+	</small>
+</div>
+
+	<div class="col-md-3 pr-0 text-right">
+	<a href="/OpenHW/magneticfield-scan/">
+	<img class="w-100" src="/OpenHW/assets/images/magneticfield_scan_cover.jpg" alt="磁场扫描仪">
+	</a>
+	</div>
+
+</div>
+          
+        
+        
+        
+          
+         
+            <div class="mb-5 d-flex justify-content-between main-loop-card">
+<div class="pr-3">
+	<h2 class="mb-1 h4 font-weight-bold">
+	<a class="text-dark" href="/OpenHW/humanface-forery-stream/">基于 FPGA 的视频流人脸伪造设备</a>
+	</h2>
+	<p class="excerpt">
+	   近年来随着机器学习等技术的发展，人工智能在图像识别、语音处理等方面的能力不断增强、应用范围不断扩大，这极大的方便了人们的生活。然而随之带来的安全问题也变得越来越不可忽视。
+	</p>
+	<small class="d-block text-muted">
+		In <span class="catlist">
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
+		
+		</span>
+	</small>
+	<small class="text-muted">
+		Jan 17, 2019
+	</small>
+</div>
+
+	<div class="col-md-3 pr-0 text-right">
+	<a href="/OpenHW/humanface-forery-stream/">
+	<img class="w-100" src="/OpenHW/assets/images/humanface_forery_stream_cover.jpg" alt="基于 FPGA 的视频流人脸伪造设备">
+	</a>
+	</div>
+
+</div>
+          
+        
+        
+        
+          
+         
+            <div class="mb-5 d-flex justify-content-between main-loop-card">
+<div class="pr-3">
+	<h2 class="mb-1 h4 font-weight-bold">
+	<a class="text-dark" href="/OpenHW/casque-auxil-aiming/">基于 FPGA 的头盔式辅助瞄准系统</a>
+	</h2>
+	<p class="excerpt">
+	   该作品的设计灵感来自于科幻电影《星际特工》中的头盔控制攻击系统。在战斗场景中，作战人员通过特殊的头盔来直接控制武器对敌人进行准确而有效的打击。在传统战争中，无论是海战、陆战还是空战，作战人员亦或是作战设备几乎都采用的是人眼机瞄的方式进行瞄准打击，其精确度不高而且作战人员还会有不确定的战场意外。我们想要利用 FPGA 的速度优势和摄像头，舵机，MPU 等传感器实现人...
+	</p>
+	<small class="d-block text-muted">
+		In <span class="catlist">
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
+		
+		</span>
+	</small>
+	<small class="text-muted">
+		Jan 17, 2019
+	</small>
+</div>
+
+	<div class="col-md-3 pr-0 text-right">
+	<a href="/OpenHW/casque-auxil-aiming/">
+	<img class="w-100" src="/OpenHW/assets/images/casque_auxil_aiming_cover.jpg" alt="基于 FPGA 的头盔式辅助瞄准系统">
+	</a>
+	</div>
+
+</div>
+          
+        
+        
+        
+          
+         
+            <div class="mb-5 d-flex justify-content-between main-loop-card">
+<div class="pr-3">
+	<h2 class="mb-1 h4 font-weight-bold">
+	<a class="text-dark" href="/OpenHW/Video-encry-decry/">基于 FPGA 的图像及视频加密解密系统</a>
+	</h2>
+	<p class="excerpt">
+	   在多媒体技术高度发展的今天，视频信息安全愈发受到人们的关注。传统的视频加密方法主要应用在软件层面上，其算法设计复杂、加密速度慢，不适用于视频的实时加密。FPGA 器件凭借高带宽全并行的特性可以实现高速运算和视频采集，能够满足视频的实时性要求，但开发难度较大。ARM 器件具备易于开发 的优势，但其运算速度低。图像的保密技术主要有图像加密技术和图像隐藏技术两种。解密通...
+	</p>
+	<small class="d-block text-muted">
+		In <span class="catlist">
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
+		
+		</span>
+	</small>
+	<small class="text-muted">
+		Jan 17, 2019
+	</small>
+</div>
+
+	<div class="col-md-3 pr-0 text-right">
+	<a href="/OpenHW/Video-encry-decry/">
+	<img class="w-100" src="/OpenHW/assets/images/Video_encry_decry_cover.jpg" alt="基于 FPGA 的图像及视频加密解密系统">
+	</a>
+	</div>
+
+</div>
+          
+        
+        
+        
+          
+         
+            <div class="mb-5 d-flex justify-content-between main-loop-card">
+<div class="pr-3">
+	<h2 class="mb-1 h4 font-weight-bold">
+	<a class="text-dark" href="/OpenHW/DL-face-detect/">基于深度学习的人脸检测系统设计文档</a>
+	</h2>
+	<p class="excerpt">
+	   新冠病毒的肆虐让整个 2020 年笼罩在恐慌之中，戴口罩成了人们外出必备 的“新日常”。新冠病毒主要通过飞沫传播和接触传播，正确选择佩戴口罩，可有效阻隔病毒传播。但在人流量庞大的商圈、车站等场所，仍有许多人拒绝佩戴口罩。若能在这些场所进行当前人群口罩检测，则能有效避免冠状病毒的传播。
+	</p>
+	<small class="d-block text-muted">
+		In <span class="catlist">
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
+		
+		</span>
+	</small>
+	<small class="text-muted">
+		Jan 17, 2019
+	</small>
+</div>
+
+	<div class="col-md-3 pr-0 text-right">
+	<a href="/OpenHW/DL-face-detect/">
+	<img class="w-100" src="/OpenHW/assets/images/DL_face_detect_cover.jpg" alt="基于深度学习的人脸检测系统设计文档">
+	</a>
+	</div>
+
+</div>
+          
+        
+        
+        
+          
+         
+            <div class="mb-5 d-flex justify-content-between main-loop-card">
+<div class="pr-3">
+	<h2 class="mb-1 h4 font-weight-bold">
+	<a class="text-dark" href="/OpenHW/AImusic-on-GRU/">一种含基于GRU网络硬件加速器的AI编曲SoC</a>
+	</h2>
+	<p class="excerpt">
+	   本作品旨在设计能够在硬件端实现 AI 编曲的 SoC，对复调音乐编曲并进行实 时推理和播放。其中以 Arm Cortex-m0 为控制器内核，对多种板载外设进行调度， 同时搭载基于 GRU 的神经网络硬件加速器，用来推理和谐的音符序列，最后由音频 DAC 实现音频输出。
+	</p>
+	<small class="d-block text-muted">
+		In <span class="catlist">
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
+		
+		</span>
+	</small>
+	<small class="text-muted">
+		Jan 17, 2019
+	</small>
+</div>
+
+	<div class="col-md-3 pr-0 text-right">
+	<a href="/OpenHW/AImusic-on-GRU/">
+	<img class="w-100" src="/OpenHW/assets/images/AImusic_on_GRU_cover.jpg" alt="一种含基于GRU网络硬件加速器的AI编曲SoC">
 	</a>
 	</div>
 
@@ -728,10 +968,10 @@ function lunr_search(term) {
             <div class="mb-5 d-flex justify-content-between main-loop-card">
 <div class="pr-3">
 	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/article-1/">基于SEA的飞机大战游戏</a>
+	<a class="text-dark" href="/OpenHW/social-distance-detecting/">社交距离检测装置</a>
 	</h2>
 	<p class="excerpt">
-	   基于 SEA 的飞机大战游戏
+	   2019 年末，新冠疫情爆发, “保持人与人之间距离”的倡议也逐渐成为大家的共识。但事实上，在人流密集场合中，社交距离的保持时常被大家忽视。如何实时监测社交场合中人与人的距离，也成为一大难题。这也坚定了我们设计社交距离检测器的想法。
 	</p>
 	<small class="d-block text-muted">
 		In <span class="catlist">
@@ -748,137 +988,8 @@ function lunr_search(term) {
 </div>
 
 	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/article-1/">
-	<img class="w-100" src="/OpenHW/assets/images/airforce_game_cover.jpg" alt="基于SEA的飞机大战游戏">
-	</a>
-	</div>
-
-</div>
-          
-        
-        
-        
-        
-
-         
-        <h4 class="font-weight-bold spanborder text-capitalize" id="platform"><span>platform</span></h4>
-            
-        
-        
-        
-          
-         
-            <div class="mb-5 d-flex justify-content-between main-loop-card">
-<div class="pr-3">
-	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/charm-old-cities/">Platform and resources</a>
-	</h2>
-	<p class="excerpt">
-	   Any current Xilinx platform, including PYNQ, and Alveo, can be used for the Open Hardware Design Contest. Participants can also enter using Amazon AWS EC2 F1, Nimbix, and other cloud ...
-	</p>
-	<small class="d-block text-muted">
-		In <span class="catlist">
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#platform">platform</a><span class="sep">, </span>
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#resource">resource</a><span class="sep">, </span>
-		
-		</span>
-	</small>
-	<small class="text-muted">
-		Jan 18, 2019
-	</small>
-</div>
-
-	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/charm-old-cities/">
-	<img class="w-100" src="/OpenHW/assets/images/home.jpg" alt="Platform and resources">
-	</a>
-	</div>
-
-</div>
-          
-        
-        
-        
-        
-
-         
-        <h4 class="font-weight-bold spanborder text-capitalize" id="resource"><span>resource</span></h4>
-            
-        
-        
-        
-          
-         
-            <div class="mb-5 d-flex justify-content-between main-loop-card">
-<div class="pr-3">
-	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/charm-old-cities/">Platform and resources</a>
-	</h2>
-	<p class="excerpt">
-	   Any current Xilinx platform, including PYNQ, and Alveo, can be used for the Open Hardware Design Contest. Participants can also enter using Amazon AWS EC2 F1, Nimbix, and other cloud ...
-	</p>
-	<small class="d-block text-muted">
-		In <span class="catlist">
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#platform">platform</a><span class="sep">, </span>
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#resource">resource</a><span class="sep">, </span>
-		
-		</span>
-	</small>
-	<small class="text-muted">
-		Jan 18, 2019
-	</small>
-</div>
-
-	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/charm-old-cities/">
-	<img class="w-100" src="/OpenHW/assets/images/home.jpg" alt="Platform and resources">
-	</a>
-	</div>
-
-</div>
-          
-        
-        
-        
-        
-
-         
-        <h4 class="font-weight-bold spanborder text-capitalize" id="jekyll"><span>Jekyll</span></h4>
-            
-        
-        
-        
-          
-         
-            <div class="mb-5 d-flex justify-content-between main-loop-card">
-<div class="pr-3">
-	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/powerful-things-markdown-editor/">Powerful things you can do with the Markdown editor</a>
-	</h2>
-	<p class="excerpt">
-	   There are lots of powerful things you can do with the Markdown editor
-	</p>
-	<small class="d-block text-muted">
-		In <span class="catlist">
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
-		
-		</span>
-	</small>
-	<small class="text-muted">
-		Jan 24, 2019
-	</small>
-</div>
-
-	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/powerful-things-markdown-editor/">
-	<img class="w-100" src="/OpenHW/assets/images/4.jpg" alt="Powerful things you can do with the Markdown editor">
+	<a href="/OpenHW/social-distance-detecting/">
+	<img class="w-100" src="/OpenHW/assets/images/social_distance_detecting_cover.jpg" alt="社交距离检测装置">
 	</a>
 	</div>
 
@@ -892,28 +1003,28 @@ function lunr_search(term) {
             <div class="mb-5 d-flex justify-content-between main-loop-card">
 <div class="pr-3">
 	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/options-for-creating-new-site-with-jekyll/">Options for creating a new site with Jekyll</a>
+	<a class="text-dark" href="/OpenHW/mulfps-integrationcam-cover/">基于多帧融合的智能相机处理系统</a>
 	</h2>
 	<p class="excerpt">
-	   jekyll new &lt;PATH&gt; installs a new Jekyll site at the path specified (relative to current directory). In this case, Jekyll will be installed in a directory called myblog. Here are...
+	   本设计针对低照度高动态情况下，单帧图像曝光不足导致的图像噪声大、色彩失准等问题，在传统的 HDR 多帧融合（Frames Merging）方法上，采用层次化的图像配准（Image Alignment）方案、自适应白平衡（White Balance）与色调映射（Tone Mapping）策略，在降低图像噪声、真实还原景物色彩的基础上，极大 抑制了多帧融合时常见的运动...
 	</p>
 	<small class="d-block text-muted">
 		In <span class="catlist">
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
 		
 		</span>
 	</small>
 	<small class="text-muted">
-		Jan 23, 2019
+		Jan 17, 2019
 	</small>
 </div>
 
 	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/options-for-creating-new-site-with-jekyll/">
-	<img class="w-100" src="/OpenHW/assets/images/13.jpg" alt="Options for creating a new site with Jekyll">
+	<a href="/OpenHW/mulfps-integrationcam-cover/">
+	<img class="w-100" src="/OpenHW/assets/images/mulfps_integrationcam_cover.png" alt="基于多帧融合的智能相机处理系统">
 	</a>
 	</div>
 
@@ -927,26 +1038,28 @@ function lunr_search(term) {
             <div class="mb-5 d-flex justify-content-between main-loop-card">
 <div class="pr-3">
 	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/never-stopped-worrying-never-loved-bomb/">Never stopped worrying or loving the bomb</a>
+	<a class="text-dark" href="/OpenHW/magneticfield-scan/">磁场扫描仪</a>
 	</h2>
 	<p class="excerpt">
-	   I’ve been through fire and water, I tell you! From my earliest pebblehood the wildest things you could imagine have been happening to this world of ours, and I have been right in the ...
+	   磁场测量是研究物质特性、探索未知世界的有效手段之一，广泛应用于 水下通信、空间磁场探测、地质勘探等军事和民用领域[1]。本作品是为了设计实现出一款快速低功耗小型化的磁场扫描仪，通过扫描的方式来得到该区域的磁场测量图像，为后续的探测或检测提供磁场图像数据。
 	</p>
 	<small class="d-block text-muted">
 		In <span class="catlist">
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
+		
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
 		
 		</span>
 	</small>
 	<small class="text-muted">
-		Jan 22, 2019
+		Jan 17, 2019
 	</small>
 </div>
 
 	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/never-stopped-worrying-never-loved-bomb/">
-	<img class="w-100" src="/OpenHW/assets/images/14.jpg" alt="Never stopped worrying or loving the bomb">
+	<a href="/OpenHW/magneticfield-scan/">
+	<img class="w-100" src="/OpenHW/assets/images/magneticfield_scan_cover.jpg" alt="磁场扫描仪">
 	</a>
 	</div>
 
@@ -960,28 +1073,28 @@ function lunr_search(term) {
             <div class="mb-5 d-flex justify-content-between main-loop-card">
 <div class="pr-3">
 	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/is-intelligence-enough/">Is Intelligence Enough</a>
+	<a class="text-dark" href="/OpenHW/humanface-forery-stream/">基于 FPGA 的视频流人脸伪造设备</a>
 	</h2>
 	<p class="excerpt">
-	   Education must also train one for quick, resolute and effective thinking. To think incisively and to think for one’s self is very difficult. We are prone to let our mental life become...
+	   近年来随着机器学习等技术的发展，人工智能在图像识别、语音处理等方面的能力不断增强、应用范围不断扩大，这极大的方便了人们的生活。然而随之带来的安全问题也变得越来越不可忽视。
 	</p>
 	<small class="d-block text-muted">
 		In <span class="catlist">
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
 		
 		</span>
 	</small>
 	<small class="text-muted">
-		Jan 21, 2019
+		Jan 17, 2019
 	</small>
 </div>
 
 	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/is-intelligence-enough/">
-	<img class="w-100" src="https://images.unsplash.com/photo-1523740856324-f2ce89135981?ixlib=rb-1.2.1&auto=format&fit=crop&w=798&q=80" alt="Is Intelligence Enough">
+	<a href="/OpenHW/humanface-forery-stream/">
+	<img class="w-100" src="/OpenHW/assets/images/humanface_forery_stream_cover.jpg" alt="基于 FPGA 的视频流人脸伪造设备">
 	</a>
 	</div>
 
@@ -995,28 +1108,28 @@ function lunr_search(term) {
             <div class="mb-5 d-flex justify-content-between main-loop-card">
 <div class="pr-3">
 	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/quick-start-guide/">Quick Start Guide</a>
+	<a class="text-dark" href="/OpenHW/casque-auxil-aiming/">基于 FPGA 的头盔式辅助瞄准系统</a>
 	</h2>
 	<p class="excerpt">
-	   If you already have a full Ruby development environment with all headers and RubyGems installed (see Jekyll’s requirements), you can create a new Jekyll site by doing the following:
+	   该作品的设计灵感来自于科幻电影《星际特工》中的头盔控制攻击系统。在战斗场景中，作战人员通过特殊的头盔来直接控制武器对敌人进行准确而有效的打击。在传统战争中，无论是海战、陆战还是空战，作战人员亦或是作战设备几乎都采用的是人眼机瞄的方式进行瞄准打击，其精确度不高而且作战人员还会有不确定的战场意外。我们想要利用 FPGA 的速度优势和摄像头，舵机，MPU 等传感器实现人...
 	</p>
 	<small class="d-block text-muted">
 		In <span class="catlist">
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
 		
 		</span>
 	</small>
 	<small class="text-muted">
-		Jan 20, 2019
+		Jan 17, 2019
 	</small>
 </div>
 
 	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/quick-start-guide/">
-	<img class="w-100" src="/OpenHW/assets/images/12.jpg" alt="Quick Start Guide">
+	<a href="/OpenHW/casque-auxil-aiming/">
+	<img class="w-100" src="/OpenHW/assets/images/casque_auxil_aiming_cover.jpg" alt="基于 FPGA 的头盔式辅助瞄准系统">
 	</a>
 	</div>
 
@@ -1030,28 +1143,28 @@ function lunr_search(term) {
             <div class="mb-5 d-flex justify-content-between main-loop-card">
 <div class="pr-3">
 	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/markup-example/">Markdown Example</a>
+	<a class="text-dark" href="/OpenHW/Video-encry-decry/">基于 FPGA 的图像及视频加密解密系统</a>
 	</h2>
 	<p class="excerpt">
-	   You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common wa...
+	   在多媒体技术高度发展的今天，视频信息安全愈发受到人们的关注。传统的视频加密方法主要应用在软件层面上，其算法设计复杂、加密速度慢，不适用于视频的实时加密。FPGA 器件凭借高带宽全并行的特性可以实现高速运算和视频采集，能够满足视频的实时性要求，但开发难度较大。ARM 器件具备易于开发 的优势，但其运算速度低。图像的保密技术主要有图像加密技术和图像隐藏技术两种。解密通...
 	</p>
 	<small class="d-block text-muted">
 		In <span class="catlist">
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
 		
 		</span>
 	</small>
 	<small class="text-muted">
-		Jan 19, 2019
+		Jan 17, 2019
 	</small>
 </div>
 
 	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/markup-example/">
-	<img class="w-100" src="/OpenHW/assets/images/6.jpg" alt="Markdown Example">
+	<a href="/OpenHW/Video-encry-decry/">
+	<img class="w-100" src="/OpenHW/assets/images/Video_encry_decry_cover.jpg" alt="基于 FPGA 的图像及视频加密解密系统">
 	</a>
 	</div>
 
@@ -1065,71 +1178,28 @@ function lunr_search(term) {
             <div class="mb-5 d-flex justify-content-between main-loop-card">
 <div class="pr-3">
 	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/customer-service/">What is Jekyll</a>
+	<a class="text-dark" href="/OpenHW/DL-face-detect/">基于深度学习的人脸检测系统设计文档</a>
 	</h2>
 	<p class="excerpt">
-	   No more databases, comment moderation, or pesky updates to install-just your content. Markdown, Liquid, HTML &amp; CSS go in. Static sites come out ready for deployment. Permalinks, c...
+	   新冠病毒的肆虐让整个 2020 年笼罩在恐慌之中，戴口罩成了人们外出必备 的“新日常”。新冠病毒主要通过飞沫传播和接触传播，正确选择佩戴口罩，可有效阻隔病毒传播。但在人流量庞大的商圈、车站等场所，仍有许多人拒绝佩戴口罩。若能在这些场所进行当前人群口罩检测，则能有效避免冠状病毒的传播。
 	</p>
 	<small class="d-block text-muted">
 		In <span class="catlist">
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
-		
-		</span>
-	</small>
-	<small class="text-muted">
-		Jan 18, 2019
-	</small>
-</div>
-
-	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/customer-service/">
-	<img class="w-100" src="/OpenHW/assets/images/11.jpg" alt="What is Jekyll">
-	</a>
-	</div>
-
-</div>
-          
-        
-        
-        
-        
-
-         
-        <h4 class="font-weight-bold spanborder text-capitalize" id="tutorial"><span>tutorial</span></h4>
-            
-        
-        
-        
-          
-         
-            <div class="mb-5 d-flex justify-content-between main-loop-card">
-<div class="pr-3">
-	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/powerful-things-markdown-editor/">Powerful things you can do with the Markdown editor</a>
-	</h2>
-	<p class="excerpt">
-	   There are lots of powerful things you can do with the Markdown editor
-	</p>
-	<small class="d-block text-muted">
-		In <span class="catlist">
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
 		
 		</span>
 	</small>
 	<small class="text-muted">
-		Jan 24, 2019
+		Jan 17, 2019
 	</small>
 </div>
 
 	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/powerful-things-markdown-editor/">
-	<img class="w-100" src="/OpenHW/assets/images/4.jpg" alt="Powerful things you can do with the Markdown editor">
+	<a href="/OpenHW/DL-face-detect/">
+	<img class="w-100" src="/OpenHW/assets/images/DL_face_detect_cover.jpg" alt="基于深度学习的人脸检测系统设计文档">
 	</a>
 	</div>
 
@@ -1143,168 +1213,28 @@ function lunr_search(term) {
             <div class="mb-5 d-flex justify-content-between main-loop-card">
 <div class="pr-3">
 	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/options-for-creating-new-site-with-jekyll/">Options for creating a new site with Jekyll</a>
+	<a class="text-dark" href="/OpenHW/AImusic-on-GRU/">一种含基于GRU网络硬件加速器的AI编曲SoC</a>
 	</h2>
 	<p class="excerpt">
-	   jekyll new &lt;PATH&gt; installs a new Jekyll site at the path specified (relative to current directory). In this case, Jekyll will be installed in a directory called myblog. Here are...
+	   本作品旨在设计能够在硬件端实现 AI 编曲的 SoC，对复调音乐编曲并进行实 时推理和播放。其中以 Arm Cortex-m0 为控制器内核，对多种板载外设进行调度， 同时搭载基于 GRU 的神经网络硬件加速器，用来推理和谐的音符序列，最后由音频 DAC 实现音频输出。
 	</p>
 	<small class="d-block text-muted">
 		In <span class="catlist">
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#project">project</a><span class="sep">, </span>
 		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
-		
-		</span>
-	</small>
-	<small class="text-muted">
-		Jan 23, 2019
-	</small>
-</div>
-
-	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/options-for-creating-new-site-with-jekyll/">
-	<img class="w-100" src="/OpenHW/assets/images/13.jpg" alt="Options for creating a new site with Jekyll">
-	</a>
-	</div>
-
-</div>
-          
-        
-        
-        
-          
-         
-            <div class="mb-5 d-flex justify-content-between main-loop-card">
-<div class="pr-3">
-	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/is-intelligence-enough/">Is Intelligence Enough</a>
-	</h2>
-	<p class="excerpt">
-	   Education must also train one for quick, resolute and effective thinking. To think incisively and to think for one’s self is very difficult. We are prone to let our mental life become...
-	</p>
-	<small class="d-block text-muted">
-		In <span class="catlist">
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
+		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#2020competition">2020competition</a><span class="sep">, </span>
 		
 		</span>
 	</small>
 	<small class="text-muted">
-		Jan 21, 2019
+		Jan 17, 2019
 	</small>
 </div>
 
 	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/is-intelligence-enough/">
-	<img class="w-100" src="https://images.unsplash.com/photo-1523740856324-f2ce89135981?ixlib=rb-1.2.1&auto=format&fit=crop&w=798&q=80" alt="Is Intelligence Enough">
-	</a>
-	</div>
-
-</div>
-          
-        
-        
-        
-          
-         
-            <div class="mb-5 d-flex justify-content-between main-loop-card">
-<div class="pr-3">
-	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/quick-start-guide/">Quick Start Guide</a>
-	</h2>
-	<p class="excerpt">
-	   If you already have a full Ruby development environment with all headers and RubyGems installed (see Jekyll’s requirements), you can create a new Jekyll site by doing the following:
-	</p>
-	<small class="d-block text-muted">
-		In <span class="catlist">
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
-		
-		</span>
-	</small>
-	<small class="text-muted">
-		Jan 20, 2019
-	</small>
-</div>
-
-	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/quick-start-guide/">
-	<img class="w-100" src="/OpenHW/assets/images/12.jpg" alt="Quick Start Guide">
-	</a>
-	</div>
-
-</div>
-          
-        
-        
-        
-          
-         
-            <div class="mb-5 d-flex justify-content-between main-loop-card">
-<div class="pr-3">
-	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/markup-example/">Markdown Example</a>
-	</h2>
-	<p class="excerpt">
-	   You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common wa...
-	</p>
-	<small class="d-block text-muted">
-		In <span class="catlist">
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
-		
-		</span>
-	</small>
-	<small class="text-muted">
-		Jan 19, 2019
-	</small>
-</div>
-
-	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/markup-example/">
-	<img class="w-100" src="/OpenHW/assets/images/6.jpg" alt="Markdown Example">
-	</a>
-	</div>
-
-</div>
-          
-        
-        
-        
-          
-         
-            <div class="mb-5 d-flex justify-content-between main-loop-card">
-<div class="pr-3">
-	<h2 class="mb-1 h4 font-weight-bold">
-	<a class="text-dark" href="/OpenHW/customer-service/">What is Jekyll</a>
-	</h2>
-	<p class="excerpt">
-	   No more databases, comment moderation, or pesky updates to install-just your content. Markdown, Liquid, HTML &amp; CSS go in. Static sites come out ready for deployment. Permalinks, c...
-	</p>
-	<small class="d-block text-muted">
-		In <span class="catlist">
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#jekyll">Jekyll</a><span class="sep">, </span>
-		
-		<a class="text-capitalize text-muted smoothscroll" href="/OpenHW/categories.html#tutorial">tutorial</a><span class="sep">, </span>
-		
-		</span>
-	</small>
-	<small class="text-muted">
-		Jan 18, 2019
-	</small>
-</div>
-
-	<div class="col-md-3 pr-0 text-right">
-	<a href="/OpenHW/customer-service/">
-	<img class="w-100" src="/OpenHW/assets/images/11.jpg" alt="What is Jekyll">
+	<a href="/OpenHW/AImusic-on-GRU/">
+	<img class="w-100" src="/OpenHW/assets/images/AImusic_on_GRU_cover.jpg" alt="一种含基于GRU网络硬件加速器的AI编曲SoC">
 	</a>
 	</div>
 
