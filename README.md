@@ -20,6 +20,8 @@ git clone https://github.com/Zenfendson/OpenHW.git
 
 添加文章只需要简单的添加markdown文件，不需要参与到很多的html的开发，甚至不需要本地环境配置
 
+有时加入新文章会发生gitpages新文章的部署出错，这是还是考虑本地化运行看看，或者把文件删了重来
+
 ## 添加文本
 
 在_post路径下创建新的.md file 注意命名格式为：**Year-Month-Day-name.md**
