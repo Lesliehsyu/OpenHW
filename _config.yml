@@ -3,7 +3,7 @@ name: 'OpenHW'
 description: 'OpenHW is a website that accomodate various opensource projects'
 #logo: 'assets/images/logo.png'
 favicon: 'assets/images/favicon.ico'
-baseurl: '/OpenHW'
+baseurl: ''
 url: ""
 disqus: 'demowebsite'
 email: 'xup_shanghai@xilinx.com'
